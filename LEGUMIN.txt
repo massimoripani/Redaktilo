@@ -1,0 +1,46 @@
+REDAKTILO
+=========
+UTF-8-redaktilo kun kromprogramoj por Esperanto kaj la teknikaj konvencioj de Monato.
+
+LANĈO
+  Windows:  duoble klaku Redaktilo.exe  (post konstruo per konstrui_exe.bat)
+  Alie:     python editor.py [dosiero]      (necesas Python 3 kun tkinter)
+
+KROMPROGRAMOJ  (dosierujo "kromprogramoj", apud la programo)
+  Kontrolo   Kontroli etikedojn kaj komentojn · Serĉi mankantajn komojn · Kalkuli signojn
+             Literumilo (kontroli la tekston · aldoni vorton al la propra vortaro)
+  Konverto   Teksto → Monato-artikolo · Teksto → Monato-intervjuo
+  Teksto     cx ↔ ĉ · Rekonstrui alineojn
+  Iloj       Eltiri ŝlosilvortojn → <sv> · HTML-antaŭvido en la retumilo
+
+NOVA KROMPROGRAMO
+  1. Kopiu kromprogramoj/_esempio.py, forigu la "_" el la nomo, ŝanĝu la kodon.
+  2. Kromprogramoj → Reŝargi kromprogramojn. (Ne necesas rekonstrui la .exe.)
+  Rubrikon, prioritaton kaj nomon de aŭtoro oni ŝanĝas en la konstantoj komence de
+  conv_articolo.py kaj conv_intervjuo.py.
+
+KLAVOKOMBINOJ
+  Ctrl+N/O/S · Ctrl+Shift+S · Ctrl+F (serĉi) · Ctrl+G (iri al linio)
+  Ctrl+B <d> · Ctrl+I <k> · Ctrl+Shift+Q <c> · Ctrl+Shift+M <mm> · Ctrl+Shift+P <p> · Ctrl+Shift+C <!-- -->
+  Skribante cx aperas ĉ; premu Retropaŝon tuj poste por reakiri cx (malŝalteble en Opcioj).
+
+LITERUMILO  (klavo F7)
+  F7 = kontroli ekde la kursoro. Por ĉiu nekonata vorto aperas dialogo kun proponoj:
+    Preterpasi ......... salti ĉi tiun ekzemplon
+    Akcepti ............ akcepti la vorton ĉie en ĉi tiu kontrolo
+    Anstataŭigi ........ meti la elektitan proponon (aŭ la vorton skribitan en la kampo malsupre)
+    Anstataŭigi ĉion ... same, por ĉiuj samaj vortoj
+    Aldoni ............. aldoni al la propra vortaro (vortaroj/propra.txt); oni konservas la radikon,
+                         do holivudaj aldonas "holivud" kaj akceptiĝas ankaŭ holivudo, holivudoj...
+    Eliri .............. fini
+  Ĉe la fino de la teksto la programo demandas ĉu daŭrigi de la komenco.
+  Ĉiu anstataŭigo estas malfarebla per Ctrl+Z.
+  Menuo Kromprogramoj → Kontrolo → "Literumilo: listo de nekonataj vortoj" montras ĉiujn (rapide, sen proponoj).
+  Uzas la vortaron Hunspell de LibreOffice (vortaroj/eo) kaj la bibliotekon "spylls".
+  Ignoras etikedojn, komentojn <!-- -->, <ret>, <kod>, <n-ro>, <inf>, sigloj (FEL, UEA)
+  kaj nomojn kun majuskla komenco meze de frazo (ŝanĝeblas: IGNORI_NOMOJN en literumado.py).
+  Dum la disvolvo (sen .exe) necesas:  pip install spylls
+
+LICENCOJ DE TRETAJ PARTOJ  (vidu dosierujon "licencoj" kaj vortaroj/eo/LEGUMIN.txt)
+  Vortaro de Esperanto (eo.aff, eo.dic) ... GNU GPL, aŭtoro Artur Trzewik (LibreOffice)
+  spylls .................................... MPL 2.0, Victor Shepelev
