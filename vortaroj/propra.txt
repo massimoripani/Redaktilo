@@ -1,1 +1,2 @@
-
+# Propra vortaro: unu radiko po linio (nomoj, fakvortoj). Linioj kun # estas komentoj.
+# La gramatikaj finaĵoj (-o, -oj, -on, -a, -e, -as, -is...) estas aŭtomate akceptataj.

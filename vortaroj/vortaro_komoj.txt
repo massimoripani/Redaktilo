@@ -1,0 +1,180 @@
+# Vortaro de esprimoj antaŭ kiuj necesas komo (ke, ki-vortoj kaj kombinoj)
+# Unu esprimo po linio; linioj komencitaj per # estas ignoritaj.
+ke
+kiu
+kiun
+kiuj
+kiujn
+kiam
+kial
+kie
+kies
+kio
+kion
+kia
+kian
+kiaj
+kiajn
+kien
+kiom
+al kiu
+al kiuj
+al kio
+al kies
+antaŭ kiu
+antaŭ kiuj
+antaŭ kio
+antaŭ kies
+apud kiu
+apud kiuj
+apud kio
+apud kies
+ĉe kiu
+ĉe kiuj
+ĉe kio
+ĉe kies
+ĉirkaŭ kiu
+ĉirkaŭ kiuj
+ĉirkaŭ kio
+ĉirkaŭ kies
+de kiu
+de kiuj
+de kio
+de kies
+dum kiu
+dum kiuj
+dum kio
+dum kies
+ekster kiu
+ekster kiuj
+ekster kio
+ekster kies
+el kiu
+el kiuj
+el kio
+el kies
+en kiu
+en kiuj
+en kio
+en kies
+inter kiu
+inter kiuj
+inter kio
+inter kies
+kontraŭ kiu
+kontraŭ kiuj
+kontraŭ kio
+kontraŭ kies
+krom kiu
+krom kiuj
+krom kio
+krom kies
+kun kiu
+kun kiuj
+kun kio
+kun kies
+laŭ kiu
+laŭ kiuj
+laŭ kio
+laŭ kies
+malantaŭ kiu
+malantaŭ kiuj
+malantaŭ kio
+malantaŭ kies
+malgraŭ kiu
+malgraŭ kiuj
+malgraŭ kio
+malgraŭ kies
+per kiu
+per kiuj
+per kio
+per kies
+por kiu
+por kiuj
+por kio
+por kies
+post kiu
+post kiuj
+post kio
+post kies
+pri kiu
+pri kiuj
+pri kio
+pri kies
+pro kiu
+pro kiuj
+pro kio
+pro kies
+sen kiu
+sen kiuj
+sen kio
+sen kies
+sub kiu
+sub kiuj
+sub kio
+sub kies
+super kiu
+super kiuj
+super kio
+super kies
+sur kiu
+sur kiuj
+sur kio
+sur kies
+tra kiu
+tra kiuj
+tra kio
+tra kies
+trans kiu
+trans kiuj
+trans kio
+trans kies
+ĝis kiu
+ĝis kiuj
+ĝis kio
+ĝis kies
+je kiu
+je kiuj
+je kio
+je kies
+anstataŭ kiu
+anstataŭ kiuj
+anstataŭ kio
+anstataŭ kies
+preter kiu
+preter kiuj
+preter kio
+preter kies
+de kiam
+de kie
+ĝis kiam
+ĝis kie
+ekde kiam
+post kiam
+antaŭ kiam
+el kie
+tra kie
+ĉe kie
+tiel ke
+tial ke
+tial ĉar
+tiom ke
+tia ke
+tiaj ke
+por ke
+malgraŭ ke
+anstataŭ ke
+krom ke
+la fakto ke
+la kondiĉo ke
+kun la kondiĉo ke
+en la okazo ke
+en la kazo ke
+sub la kondiĉo ke
+pro tio ke
+malgraŭ tio ke
+krom tio ke
+anstataŭ tio ke
+je tio ke
+pri tio ke
+de tiam kiam
