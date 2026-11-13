@@ -1,1 +1,36 @@
+LINGVAJ PAKAĜOJ / PACCHETTI LINGUISTICI / LANGUAGE PACKS
+=========================================================
+Ĉiu lingvo estas dosiero  <kodo>.json  en tiu ĉi dosierujo (eo.json, it.json, en.json).
+Ogni lingua è un file  <codice>.json  in questa cartella.
+Each language is a file  <code>.json  in this folder.
 
+Formato / Formato / Format:
+  {
+   "_meta": {"kodo": "fr", "nomo": "Français", "versio": 1},
+   "ĉenoj": {
+     "Esperanta teksto": "traduction",
+     ...
+   }
+  }
+
+* La ŝlosilo estas la Esperanta teksto de la programo. Mankanta traduko = Esperanto.
+  La chiave è il testo esperanto del programma. Traduzione mancante = esperanto.
+  The key is the program's Esperanto text. Missing translation = Esperanto.
+* Teksto kun {nomo} (ekz. {n}, {e}): konservu la kunligilojn senŝanĝaj.
+  Nei testi con {nome} (es. {n}, {e}) lascia invariati i segnaposto.
+  Keep {placeholders} unchanged.
+* Nova lingvo: kopiu eo.json al <kodo>.json, tradukku la valorojn, restartu Redaktilon,
+  elektu ĝin en  Opcioj → Lingvo.
+  Nuova lingua: copia eo.json in <codice>.json, traduci i valori, riavvia Redaktilo,
+  scegli la lingua in  Opzioni → Lingua.
+  New language: copy eo.json to <code>.json, translate the values, restart Redaktilo,
+  choose it in  Options → Language.
+* Kromprogramoj: aldonaj dosieroj  <kodo>.<nomo>.json (ekz. it.literumado.json) estas
+  aŭtomate kunfanditaj; ili tradukas etikedojn kaj mesaĝojn de la kromprogramoj
+  (CATEGORY, NAME, ACTIONS kaj la tekstoj donitaj al ctx.info/warn/error/report...).
+  Plugin: i file  <codice>.<nome>.json (es. it.literumado.json) vengono uniti
+  automaticamente; traducono etichette e messaggi dei plugin.
+  Plugins: extra files  <code>.<name>.json are merged automatically; they translate
+  plugin labels and messages.
+* Lingvo elektita en la dosiero agordoj.json de la uzanto-dosierujo (aŭ medivariablo
+  REDAKTILO_LINGVO=it).
