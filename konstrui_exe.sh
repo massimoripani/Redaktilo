@@ -8,5 +8,5 @@ while read -r M; do
   [ -n "$M" ] && HID="$HID --hidden-import $M"
 done < moduloj.txt
 $PY -m PyInstaller --noconfirm --clean --windowed --name Redaktilo --collect-submodules spylls $HID editor.py || exit 1
-cp -r kromprogramoj vortaroj licencoj dist/Redaktilo/ && cp LEGUMIN.txt LICENCO.txt dist/Redaktilo/
+cp -r kromprogramoj vortaroj lingvoj licencoj dist/Redaktilo/ && cp LEGUMIN.txt LICENCO.txt dist/Redaktilo/
 echo "FINITE: dist/Redaktilo/"

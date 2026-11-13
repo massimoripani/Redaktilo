@@ -1,4 +1,4 @@
-MIT License  (PROJEKTO DE LICENCO - la aŭtoro decidu pri la fina licenco)
+MIT License
 
 Copyright (c) 2026 Massimo Ripani
 

@@ -24,6 +24,7 @@ xcopy /E /I /Y kromprogramoj "dist\Redaktilo\kromprogramoj" >nul
 copy /Y LEGUMIN.txt "dist\Redaktilo\" >nul
 copy /Y LICENCO.txt "dist\Redaktilo\" >nul
 xcopy /E /I /Y vortaroj "dist\Redaktilo\vortaroj" >nul
+xcopy /E /I /Y lingvoj "dist\Redaktilo\lingvoj" >nul
 xcopy /E /I /Y licencoj "dist\Redaktilo\licencoj" >nul
 
 if not exist "dist\Redaktilo\Redaktilo.exe" goto eraro

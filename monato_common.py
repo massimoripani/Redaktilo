@@ -1,6 +1,20 @@
 # -*- coding: utf-8 -*-
 """Funzioni condivise dai plugin (convenzioni Monato)."""
+import os
 import re
+import sys
+
+# Cartella unica dei vocabolari (accanto al programma, non accanto ai plugin):
+#   vortaroj/propra.txt, vortaroj/vortaro_komoj.txt, vortaroj/html_entoj.txt, vortaroj/eo/...
+# Con l'exe (PyInstaller) è accanto a Redaktilo.exe, altrimenti accanto a editor.py.
+_BASE = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) \
+    else os.path.dirname(os.path.abspath(__file__))
+VORTARO_DIR = os.path.join(_BASE, "vortaroj")
+
+
+def vortaro_path(*parts):
+    """Percorso di un file di vocabolario: vortaro_path('vortaro_komoj.txt')."""
+    return os.path.join(VORTARO_DIR, *parts)
 
 # Tag previsti dalle convenzioni Monato
 SELF_CLOSING = {"hs", "nl", "ss", "mend"}
