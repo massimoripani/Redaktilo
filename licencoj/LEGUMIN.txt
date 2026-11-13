@@ -1,1 +1,8 @@
-
+LICENCOJ DE TRETAJ PARTOJ
+=========================
+spylls (literumada biblioteko, enpakita en la .exe) ... Mozilla Public License 2.0
+    Fonto: https://github.com/zverok/spylls   Teksto: spylls-MPL-2.0.txt
+Vortaro de Esperanto (vortaroj/eo)  ................... GNU General Public License
+    Fonto: https://github.com/LibreOffice/dictionaries (eo)   Teksto: vortaroj/eo/license-en.txt
+Python kaj tkinter ..................................... PSF License (https://docs.python.org/3/license.html)
+PyInstaller (nur por konstrui la .exe) ................. GPL kun escepto por la konstruita programo
