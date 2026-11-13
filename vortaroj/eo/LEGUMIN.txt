@@ -1,1 +1,9 @@
+VORTARO PRI LITERUMADO (Esperanto)
+==================================
+Dosieroj: eo.aff, eo.dic  (neŝanĝitaj)
+Fonto:    https://github.com/LibreOffice/dictionaries  (dosierujo "eo")
+Aŭtoro:   Artur Trzewik (2010), kun postaj kontribuoj
+Licenco:  GNU General Public License (vidu license-en.txt kaj la komencon de eo.aff)
 
+Ĉi tiu vortaro estas aparta dosiero legata de la kromprogramo "literumado.py".
+Ĝi ne estas parto de la kodo de Redaktilo kaj restas sub sia propra licenco.
