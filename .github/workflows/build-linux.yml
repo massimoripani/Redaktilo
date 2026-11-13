@@ -20,12 +20,32 @@ jobs:
       - name: Installa dipendenze di sistema
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk
+          sudo apt-get install -y python3-tk xvfb xauth
 
       - name: Esegui compilazione Linux
         run: |
           chmod +x konstrui_exe.sh
           ./konstrui_exe.sh
+
+      - name: Verifica presenza eseguibile
+        run: |
+          test -x dist/Redaktilo/Redaktilo
+          echo "Eseguibile Linux trovato."
+
+      - name: Test automatico avvio Redaktilo
+        run: |
+          set +e
+          xvfb-run -a timeout --signal=TERM --kill-after=5s 20s \
+            ./dist/Redaktilo/Redaktilo
+          RESULT=$?
+          set -e
+
+          if [ "$RESULT" -eq 0 ] || [ "$RESULT" -eq 124 ]; then
+            echo "TEST SUPERATO: Redaktilo si è avviato."
+          else
+            echo "TEST FALLITO: errore durante l'avvio (codice $RESULT)."
+            exit 1
+          fi
 
       - name: Crea archivio Linux
         run: |
