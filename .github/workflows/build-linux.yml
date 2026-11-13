@@ -1,1 +1,38 @@
 
+name: Build Redaktilo Linux
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Scarica il repository
+        uses: actions/checkout@v4
+
+      - name: Installa Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Installa dipendenze di sistema
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk
+
+      - name: Esegui compilazione Linux
+        run: |
+          chmod +x konstrui_exe.sh
+          ./konstrui_exe.sh
+
+      - name: Crea archivio Linux
+        run: |
+          tar -czf Redaktilo-2.32-Linux.tar.gz -C dist Redaktilo
+
+      - name: Pubblica pacchetto
+        uses: actions/upload-artifact@v4
+        with:
+          name: Redaktilo-2.32-Linux
+          path: Redaktilo-2.32-Linux.tar.gz
