@@ -14,14 +14,14 @@ permissions:
 jobs:
   audit:
     name: Analyze Python code
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Download repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -31,30 +31,33 @@ jobs:
           python -m pip install ruff vulture deptry
 
       - name: Check Python files
+        id: python-files
         run: |
           if find . -name "*.py" -not -path "./.git/*" | grep -q .; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
             echo "Python files found."
           else
+            echo "found=false" >> "$GITHUB_OUTPUT"
             echo "No Python files found."
-            exit 0
           fi
 
       - name: Check unused imports and variables
+        if: steps.python-files.outputs.found == 'true'
         run: ruff check . --select F401,F841
 
       - name: Detect potentially unused code
+        if: steps.python-files.outputs.found == 'true'
         continue-on-error: true
-        run: |
-          vulture . --min-confidence 80 | tee vulture-report.txt
+        run: vulture . --min-confidence 80 | tee vulture-report.txt
 
       - name: Check unused dependencies
-        if: hashFiles('pyproject.toml') != ''
+        if: steps.python-files.outputs.found == 'true' && hashFiles('pyproject.toml') != ''
         continue-on-error: true
         run: deptry .
 
       - name: Save analysis report
-        if: always()
-        uses: actions/upload-artifact@v4
+        if: always() && steps.python-files.outputs.found == 'true'
+        uses: actions/upload-artifact@v7
         with:
           name: redaktilo-python-audit
           path: vulture-report.txt
