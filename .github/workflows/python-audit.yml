@@ -28,7 +28,12 @@ jobs:
       - name: Install analysis tools
         run: |
           python -m pip install --upgrade pip
-          python -m pip install ruff vulture deptry
+          python -m pip install ruff vulture pip-check-reqs
+
+      - name: Install project dependencies
+        if: hashFiles('requirements.txt') != ''
+        run: |
+          python -m pip install -r requirements.txt
 
       - name: Check Python files
         id: python-files
@@ -63,11 +68,15 @@ jobs:
           vulture . --min-confidence 60 | tee vulture-report.txt
           echo "Vulture analysis completed."
 
-      - name: Check unused dependencies
-        if: steps.python-files.outputs.found == 'true' && hashFiles('pyproject.toml') != ''
-        continue-on-error: true
+      - name: Check missing dependencies
+        if: steps.python-files.outputs.found == 'true' && hashFiles('requirements.txt') != ''
         run: |
-          deptry .
+          pip-missing-reqs . --use-gitignore
+
+      - name: Check unused dependencies
+        if: steps.python-files.outputs.found == 'true' && hashFiles('requirements.txt') != ''
+        run: |
+          pip-extra-reqs . --use-gitignore
 
       - name: Save analysis report
         if: always() && steps.python-files.outputs.found == 'true'
