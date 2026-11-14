@@ -11,7 +11,7 @@ import os
 import re
 
 CATEGORY = "Kontroliloj"
-NAME = "Kontroli esperantajn vortdividojn"
+NAME = "Misdividoj"
 
 _BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DIC_PATH = os.path.join(_BASE, "vortaroj", "eo", "eo")
