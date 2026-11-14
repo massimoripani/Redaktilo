@@ -33,9 +33,18 @@ jobs:
       - name: Check Python files
         id: python-files
         run: |
-          if find . -name "*.py" -not -path "./.git/*" | grep -q .; then
+          find . -name "*.py" -not -path "./.git/*" | sort > python-files.txt
+
+          echo "Python files found:"
+          cat python-files.txt
+
+          COUNT=$(wc -l < python-files.txt | tr -d ' ')
+
+          echo ""
+          echo "Total Python files: $COUNT"
+
+          if [ "$COUNT" -gt 0 ]; then
             echo "found=true" >> "$GITHUB_OUTPUT"
-            echo "Python files found."
           else
             echo "found=false" >> "$GITHUB_OUTPUT"
             echo "No Python files found."
@@ -43,23 +52,30 @@ jobs:
 
       - name: Check unused imports and variables
         if: steps.python-files.outputs.found == 'true'
-        run: ruff check . --select F401,F841
+        run: |
+          ruff check . --select F401,F841
 
       - name: Detect potentially unused code
         if: steps.python-files.outputs.found == 'true'
         continue-on-error: true
-        run: vulture . --min-confidence 80 | tee vulture-report.txt
+        run: |
+          echo "Starting Vulture analysis..."
+          vulture . --min-confidence 60 | tee vulture-report.txt
+          echo "Vulture analysis completed."
 
       - name: Check unused dependencies
         if: steps.python-files.outputs.found == 'true' && hashFiles('pyproject.toml') != ''
         continue-on-error: true
-        run: deptry .
+        run: |
+          deptry .
 
       - name: Save analysis report
         if: always() && steps.python-files.outputs.found == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: redaktilo-python-audit
-          path: vulture-report.txt
+          path: |
+            vulture-report.txt
+            python-files.txt
           if-no-files-found: ignore
           retention-days: 14
