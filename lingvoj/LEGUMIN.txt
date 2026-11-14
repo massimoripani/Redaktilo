@@ -32,5 +32,5 @@ Formato / Formato / Format:
   automaticamente; traducono etichette e messaggi dei plugin.
   Plugins: extra files  <code>.<name>.json are merged automatically; they translate
   plugin labels and messages.
-* Lingvo elektita en la dosiero agordoj.json de la uzanto-dosierujo (aŭ medivariablo
+* Lingvo elektita en la dosiero settings.json de la uzanto-dosierujo (aŭ medivariablo
   REDAKTILO_LINGVO=it).
