@@ -1,0 +1,86 @@
+name: Build Redaktilo
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            name: windows
+          - os: ubuntu-latest
+            name: linux
+          - os: macos-latest
+            name: macos
+
+    steps:
+      - name: Checkout del codice
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Dipendenze di sistema (solo Linux, per tkinter)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y python3-tk tk-dev
+
+      # Lo script .bat termina con "pause": "< nul" evita che resti in attesa di un tasto.
+      - name: Build con konstrui_exe.bat (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: call konstrui_exe.bat < nul
+
+      - name: Build con konstrui_exe.sh (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: sh konstrui_exe.sh
+
+      - name: Comprimi (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Compress-Archive -Path dist/Redaktilo -DestinationPath Redaktilo-${{ matrix.name }}.zip
+
+      - name: Comprimi (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          cd dist
+          zip -r -y ../Redaktilo-${{ matrix.name }}.zip Redaktilo
+
+      - name: Carica l'artefatto
+        uses: actions/upload-artifact@v4
+        with:
+          name: Redaktilo-${{ matrix.name }}
+          path: Redaktilo-${{ matrix.name }}.zip
+          if-no-files-found: error
+
+  release:
+    name: Pubblica la Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Scarica gli artefatti
+        uses: actions/download-artifact@v4
+        with:
+          path: artefatti
+          merge-multiple: true
+
+      - name: Crea la Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artefatti/*.zip
+          generate_release_notes: true
