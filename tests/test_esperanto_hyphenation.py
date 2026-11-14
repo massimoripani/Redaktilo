@@ -94,6 +94,7 @@ class DetectionTests(unittest.TestCase):
     def test_prefixes_include_doubled_consonants(self):
         self.assertEqual(self.check("mal-\nliberejo"), [])
         self.assertEqual(self.check("mal-\nlumo"), [])
+        self.assertEqual(self.check("sub-\nŝtato"), [])
 
     def test_grammatical_endings_are_kept_with_their_word(self):
         for text in (
@@ -115,6 +116,10 @@ class DetectionTests(unittest.TestCase):
         findings = self.check("ŝip-\no")
         self.assertEqual(len(findings), 1)
         self.assertIn("ŝi-po", findings[0][1])
+
+    def test_lingvon_syllabic_boundary(self):
+        self.assertIn(4, hyphenation.syllable_boundaries("lingvon"))
+        self.assertEqual(self.check("ling-\nvon"), [])
 
     def test_markup_is_ignored_and_line_numbers_preserved(self):
         self.assertEqual(self.check("<!-- ignoru --> <b>espe-</b>\nranto"), [])

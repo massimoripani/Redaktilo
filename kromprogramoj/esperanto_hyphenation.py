@@ -44,7 +44,7 @@ ENDINGS = (
 
 _LETTER = r"[^\W\d_]"
 _SPLIT_RE = re.compile(
-    rf"(?P<left>{_LETTER}+(?:-{_LETTER}+)*)-[ \t]*\r?\n[ \t]*(?P<right>{_LETTER}+)" ,
+    rf"(?P<left>{_LETTER}+(?:-{_LETTER}+)*)-[ \t]*\r?\n[ \t]*(?P<right>{_LETTER}+)",
     re.UNICODE,
 )
 _TAG_OR_COMMENT = re.compile(r"<!--.*?-->|<[^>]*>", re.DOTALL)
@@ -67,7 +67,11 @@ def _is_vowel(ch):
 
 
 def _syllable_nuclei(word):
-    """Redonu la komencajn kaj finajn poziciojn de vokalaj nukleoj."""
+    """Redonu (komenco, fino)-parojn por vokalaj nukleoj.
+
+    La ses diftongoj estas traktataj kiel unu nukleo. Aliaj apudaj vokaloj
+    formas hiaton.
+    """
     w = word.lower()
     nuclei = []
     i = 0
@@ -176,7 +180,8 @@ def _is_lexical_form(dictionary, form, depth=0):
 
     # Radiko + derivaj sufiksoj/participa formo + gramatika finaĵo.
     for cut in range(1, len(form)):
-        if _tail_is_suffixes_and_ending(form[cut:]) and _known_stem(dictionary, form[:cut]):
+        if (_tail_is_suffixes_and_ending(form[cut:])
+                and _known_stem(dictionary, form[:cut])):
             return True
 
     # Kunmetaĵoj: ambaŭ flankoj devas havi sendependan vortaran subtenon.
@@ -209,9 +214,7 @@ def is_morphological_boundary(word, cut, dictionary):
     if _tail_is_suffixes_and_ending(right) and _known_stem(dictionary, left):
         return True
 
-    # Radiko (aŭ komponanto) + alia radiko kun ebla finaĵo. Ĉi tiu
-    # kontrolo ankaŭ kovras limojn en kunmetaĵoj kiel ĉef-strato kaj
-    # naskiĝ-urbo, sen postuli silaban koincidon.
+    # Radiko (aŭ komponanto) + alia radiko kun ebla finaĵo.
     if _known_stem(dictionary, left) and _is_lexical_form(dictionary, right):
         return True
 
@@ -268,7 +271,9 @@ def _load_dictionary(ctx):
     except ImportError:
         ctx.warn("Mankas la pakaĵo «spylls». Instalu ĝin per: pip install spylls")
     except Exception as error:
-        ctx.warn(f"Ne eblas ŝargi la Esperanto-vortaron ({_DIC_PATH}.dic):\n{error}")
+        ctx.warn(
+            f"Ne eblas ŝargi la Esperanto-vortaron ({_DIC_PATH}.dic):\n{error}"
+        )
     return None
 
 
