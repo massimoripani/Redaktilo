@@ -528,6 +528,8 @@ class App:
         self.wrap = tk.BooleanVar(value=True)
         self.highlight_on = tk.BooleanVar(value=True)
         self._status_msg = ""
+        recent = load_settings().get("lastatempaj_dosieroj", [])
+        self.recent_files = [os.path.abspath(p) for p in recent if isinstance(p, str)][:10] if isinstance(recent, list) else []
         self.plugins = []
         self.plugin_errors = []
         self.commands = {}               # id -> dict(group,label,run,default)
@@ -606,13 +608,11 @@ class App:
         for seq in ("<Button-3>", "<Button-2>"):          # tasto destro (Windows/Linux) e Mac
             self.report_list.bind(seq, self._report_popup)
 
-
-
     def _italic(self):
         f = self.font.copy()
         f.configure(slant="italic")
         return f
-       
+
     def _build_menus(self):
         r = self.root
         self.menubar = tk.Menu(r)
@@ -621,6 +621,8 @@ class App:
         m = tk.Menu(self.menubar, tearoff=0)
         self._add_cmd(m, "dosiero.nova")
         self._add_cmd(m, "dosiero.malfermi")
+        self.recent_menu = tk.Menu(m, tearoff=0, postcommand=self._populate_recent_menu)
+        m.add_cascade(label=tr("Lastatempe malfermitaj"), menu=self.recent_menu)
         self._add_cmd(m, "dosiero.konservi")
         self._add_cmd(m, "dosiero.konservi_kiel")
         m.add_separator()
@@ -777,6 +779,49 @@ class App:
         self._build_plugin_menu()
         self._apply_bindings()
         self.set_status_message(tr("{n} funkcioj de kromprogramoj ŝargitaj").format(n=len(self.plugins)))
+
+    def _populate_recent_menu(self):
+        self.recent_menu.delete(0, "end")
+        if not self.recent_files:
+            self.recent_menu.add_command(label=tr("(neniu)"), state="disabled")
+            return
+
+        for path in self.recent_files:
+            self.recent_menu.add_command(
+                label=path,
+                command=lambda p=path: self.open_file(p),
+            )
+        self.recent_menu.add_separator()
+        self.recent_menu.add_command(
+            label=tr("Forigi liston"),
+            command=self._clear_recent_files,
+        )
+
+    def _remember_recent(self, path):
+        if not path:
+            return
+        path = os.path.abspath(path)
+        key = os.path.normcase(path)
+        self.recent_files = [p for p in self.recent_files if os.path.normcase(p) != key]
+        self.recent_files.insert(0, path)
+        self.recent_files = self.recent_files[:10]
+
+        settings = load_settings()
+        settings["lastatempaj_dosieroj"] = self.recent_files
+        try:
+            save_settings(settings)
+        except OSError as e:
+            show_error(self.root, tr("Ne eblas konservi:\n{e}").format(e=e))
+
+    def _clear_recent_files(self):
+        self.recent_files = []
+        settings = load_settings()
+        settings["lastatempaj_dosieroj"] = []
+        try:
+            save_settings(settings)
+        except OSError as e:
+            show_error(self.root, tr("Ne eblas konservi:\n{e}").format(e=e))
+        self._populate_recent_menu()
 
     # ------------------------------------------------- gestore delle klavkombinoj
     def _register(self, cid, group, label, run, default):
@@ -1274,6 +1319,7 @@ class App:
         for d in self.docs:                       # già aperto: passa a quella scheda
             if d.path and os.path.normcase(os.path.abspath(d.path)) == key:
                 self._select_doc(d)
+                self._remember_recent(d.path)
                 return
         try:
             with open(path, "rb") as f:
@@ -1297,6 +1343,7 @@ class App:
         self.eol = "\r\n" if "\r\n" in s else "\n"
         s = s.replace("\r\n", "\n")
         self._load(s, path, note)
+        self._remember_recent(path)
 
     def _load(self, s, path, note="UTF-8"):
         t = self.text
@@ -1341,6 +1388,7 @@ class App:
             show_error(self.root, tr("Ne eblas konservi:\n{e}").format(e=e))
             return False
         self.path = path
+        self._remember_recent(path)
         self.encoding_note = "UTF-8"
         self.dirty = False
         self._update_title()
