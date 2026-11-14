@@ -611,9 +611,8 @@ class App:
     def _italic(self):
         f = self.font.copy()
         f.configure(slant="italic")
-        self._italic_font = f
         return f
-
+       
     def _build_menus(self):
         r = self.root
         self.menubar = tk.Menu(r)
