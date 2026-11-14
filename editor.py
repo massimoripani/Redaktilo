@@ -352,7 +352,7 @@ EKZEMPLOJ
   Forigi finajn spacojn:      serĉi  [ \\t]+$      anstataŭigi per  (nenio)
   Unu alineo → unu linio:     serĉi  \\n\\n        anstataŭigi per  \\n
   Meti <p> ĉirkaŭ ĉiu linio:  serĉi  ^(.+)$     anstataŭigi per  <p>\\1</p>
-"""
+ """
 
 # =====================================================================
 # Contesto passato ai plugin
@@ -527,6 +527,7 @@ class App:
         self.auto_cx = tk.BooleanVar(value=True)
         self.wrap = tk.BooleanVar(value=True)
         self.highlight_on = tk.BooleanVar(value=True)
+        self.search_all = tk.BooleanVar(value=False)
         self._status_msg = ""
         recent = load_settings().get("lastatempaj_dosieroj", [])
         self.recent_files = [os.path.abspath(p) for p in recent if isinstance(p, str)][:10] if isinstance(recent, list) else []
@@ -1562,12 +1563,14 @@ class App:
             row=3, column=1, columnspan=3, sticky="w", padx=6)
         ttk.Checkbutton(d, text=tr("Specialaj signoj  (\\n  \\t  \\uXXXX)"), variable=self._esc_var).grid(
             row=4, column=1, columnspan=3, sticky="w", padx=6)
-        ttk.Button(d, text=tr("Serĉi antaŭen"), command=lambda: self.find_next(False)).grid(row=5, column=1, pady=(8, 2))
-        ttk.Button(d, text=tr("Serĉi malantaŭen"), command=lambda: self.find_next(True)).grid(row=5, column=2)
-        ttk.Button(d, text=tr("Anstataŭigi"), command=self.replace_one).grid(row=5, column=3, padx=2)
+        ttk.Checkbutton(d, text=tr("Serĉi en ĉiuj folioj"), variable=self.search_all).grid(
+            row=5, column=1, columnspan=3, sticky="w", padx=6)
+        ttk.Button(d, text=tr("Serĉi antaŭen"), command=lambda: self.find_next(False)).grid(row=6, column=1, pady=(8, 2))
+        ttk.Button(d, text=tr("Serĉi malantaŭen"), command=lambda: self.find_next(True)).grid(row=6, column=2)
+        ttk.Button(d, text=tr("Anstataŭigi"), command=self.replace_one).grid(row=6, column=3, padx=2)
         ttk.Button(d, text=tr("Helpo"), command=lambda: show_info(self.root, tr(SEARCH_HELP), title="Serĉi: helpo")
-                   ).grid(row=6, column=1, pady=(0, 8))
-        ttk.Button(d, text=tr("Anstataŭigi ĉion"), command=self.replace_all).grid(row=6, column=3, padx=2, pady=(0, 8))
+                   ).grid(row=7, column=1, pady=(0, 8))
+        ttk.Button(d, text=tr("Anstataŭigi ĉion"), command=self.replace_all).grid(row=7, column=3, padx=2, pady=(0, 8))
         e1.focus_set()
         e1.bind("<Return>", lambda e: self.find_next(False))
         d.bind("<Escape>", lambda e: d.destroy())
@@ -1587,7 +1590,7 @@ class App:
     def _offset(self, index):
         return len(self.text.get("1.0", index))
 
-    def find_next(self, backwards=False):
+    def _find_next_local(self, backwards=False):
         comp = self._compile_search()
         if comp is None:
             return False
@@ -1631,10 +1634,23 @@ class App:
             self.set_status_message(tr("Daŭrigita de la fino") if backwards else tr("Daŭrigita de la komenco"))
         return True
 
-    def replace_one(self):
+    def find_next(self, backwards=False):
+        if self.search_all.get():
+            docs = self.docs
+            start = docs.index(self.doc) if self.doc in docs else 0
+            for step in range(len(docs)):
+                doc = docs[(start + step) % len(docs)]
+                self._select_doc(doc)
+                if self._find_next_local(backwards):
+                    return True
+            self.set_status_message(tr("Ne trovita"))
+            return False
+        return self._find_next_local(backwards)
+
+    def _replace_one_local(self):
         comp = self._compile_search()
         if comp is None:
-            return
+            return False
         rx, expand = comp
         if self.text.tag_ranges("sel"):
             s0, s1 = self._offset("sel.first"), self._offset("sel.last")
@@ -1644,23 +1660,49 @@ class App:
                     new = expand(m)
                 except (re.error, IndexError) as e:
                     show_error(self.root, tr("Nevalida anstataŭigo:\n{e}").format(e=e))
-                    return
+                    return False
                 self.replace_selection(new)
-        self.find_next(False)
+                self._find_next_local(False)
+                return True
+        return False
 
-    def replace_all(self):
+    def replace_one(self):
+        if self.search_all.get():
+            docs = self.docs
+            start = docs.index(self.doc) if self.doc in docs else 0
+            for step in range(len(docs)):
+                doc = docs[(start + step) % len(docs)]
+                self._select_doc(doc)
+                if self._replace_one_local():
+                    return
+            self.set_status_message(tr("Ne trovita"))
+            return
+        self._replace_one_local()
+
+    def _replace_all_local(self):
         comp = self._compile_search()
         if comp is None:
-            return
+            return 0
         rx, expand = comp
         try:
             new, n = rx.subn(expand, self.get_text())
         except (re.error, IndexError) as e:
             show_error(self.root, tr("Nevalida anstataŭigo:\n{e}").format(e=e))
-            return
+            return 0
         if n and new != self.get_text():
             self.set_text(new)
-        self.set_status_message(tr("{n} anstataŭigoj").format(n=n))
+        return n
+
+    def replace_all(self):
+        if self.search_all.get():
+            total = 0
+            for doc in self.docs:
+                self._select_doc(doc)
+                total += self._replace_all_local()
+            self.set_status_message(tr("{n} anstataŭigoj").format(n=total))
+            return
+        total = self._replace_all_local()
+        self.set_status_message(tr("{n} anstataŭigoj").format(n=total))
 
     # ------------------------------------------------- evidenziazione / stato
     def _schedule_highlight(self, doc=None):
