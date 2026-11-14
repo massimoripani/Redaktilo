@@ -1,9 +1,13 @@
-"""Unit tests for the dependency-free Esperanto syllabification and checker."""
+"""Testoj por la morfologia kaj silaba Esperanto-vortdividilo."""
 import importlib.util
 import pathlib
 import unittest
 
-PLUGIN = pathlib.Path(__file__).resolve().parents[1] / "kromprogramoj" / "esperanto_hyphenation.py"
+PLUGIN = (
+    pathlib.Path(__file__).resolve().parents[1]
+    / "kromprogramoj"
+    / "esperanto_hyphenation.py"
+)
 spec = importlib.util.spec_from_file_location("esperanto_hyphenation", PLUGIN)
 hyphenation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(hyphenation)
@@ -31,9 +35,13 @@ class SyllabificationTests(unittest.TestCase):
         self.assertEqual(hyphenation.syllabify("eŭropo"), "eŭ-ro-po")
         self.assertEqual(hyphenation.syllabify("familio"), "fa-mi-li-o")
 
-    def test_one_vowel_and_consecutive_hiatus(self):
+    def test_hiatus_and_single_vowel(self):
         self.assertEqual(hyphenation.syllabify("a"), "a")
         self.assertEqual(hyphenation.syllabify("poeto"), "po-e-to")
+
+    def test_diphthong_letters_are_part_of_the_nucleus(self):
+        self.assertEqual(hyphenation._syllable_nuclei("aŭto"), ((0, 2), (3, 4)))
+        self.assertEqual(hyphenation._syllable_nuclei("ajna"), ((0, 2), (3, 4)))
 
 
 class DetectionTests(unittest.TestCase):
@@ -41,53 +49,76 @@ class DetectionTests(unittest.TestCase):
         self.dictionary = FakeDictionary({
             "esperanto", "patro", "akvo", "aŭto", "ŝipo", "ĝardeno",
             "instruisto", "familio", "poeto", "reverki", "librejo",
+            "virinoj", "viro", "subŝtato", "ŝtato", "lingvon",
+            "publikigita", "publika", "vortaro", "libro",
         })
 
     def check(self, text):
         return hyphenation.find_suspect_breaks(text, self.dictionary)
 
-    def test_correct_breaks_not_reported(self):
+    def test_valid_syllabic_breaks_are_not_reported(self):
+        self.assertEqual(self.check("espe-\nranto"), [])
         self.assertEqual(self.check("es-pe-\nranto"), [])
         self.assertEqual(self.check("pa-\ntro"), [])
         self.assertEqual(self.check("aŭ-\nto"), [])
         self.assertEqual(self.check("ŝi-\npo"), [])
 
-    def test_incorrect_break_reports_location_and_suggestion(self):
+    def test_invalid_syllabic_break_reports_location_and_suggestion(self):
         findings = self.check("Unua linio.\nesper-\nanto")
-        # A line break is only considered between adjacent physical lines.
-        self.assertEqual(findings, [])
-        findings = self.check("Unua linio.\nesper-\nanto")
-        self.assertEqual(findings, [])
-        findings = self.check("espe-\nranto")
         self.assertEqual(len(findings), 1)
         line, message = findings[0]
-        self.assertEqual(line, 1)
-        self.assertIn("Originalo «espe-ranto»", message)
-        self.assertIn("detektita divido espe|ranto", message)
+        self.assertEqual(line, 2)
+        self.assertIn("Originalo «esper-anto»", message)
+        self.assertIn("detektita divido esper|anto", message)
         self.assertIn("es-pe-ran-to", message)
 
-    def test_esperanto_diacritics_and_diphthongs(self):
-        self.assertEqual(len(self.check("ŝip-\no")), 1)
-        self.assertEqual(self.check("aŭ-\nto"), [])
+    def test_morphological_boundaries_are_accepted(self):
+        self.assertFalse(
+            self.check("vir-\ninoj"),
+            "vir-inoj should be accepted as vir + in + oj",
+        )
+        self.assertFalse(
+            self.check("sub-\nŝtato"),
+            "sub-ŝtato should be accepted as prefix + root",
+        )
+        self.assertFalse(
+            self.check("publik-\nigita"),
+            "publik-igita should be accepted as root + suffix chain",
+        )
 
-    def test_prefix_suffix_compounds_and_ambiguous_words(self):
-        # Rekonitaj vortoj estas traktataj per sia tuta literumita formo.
+    def test_lingvon_syllabic_boundary(self):
+        self.assertIn(4, hyphenation.syllable_boundaries("lingvon"))
+        self.assertEqual(self.check("ling-\nvon"), [])
+
+    def test_incorrect_break_with_esperanto_diacritics(self):
+        findings = self.check("ŝip-\no")
+        self.assertEqual(len(findings), 1)
+        self.assertIn("ŝi-po", findings[0][1])
+
+    def test_prefix_suffix_and_unknown_words(self):
         self.assertEqual(self.check("re-\nverki"), [])
         self.assertEqual(self.check("libr-\nejo"), [])
-        # Nekonataj/fremdaj nomoj kaj kunmetaĵoj ne ricevas konjektajn avertojn.
         self.assertEqual(self.check("Xyz-\nabc"), [])
         self.assertEqual(self.check("vort-\naro"), [])
-        self.assertEqual(self.check("esperanto-vort-\naro"), [])
 
     def test_markup_is_ignored_and_line_numbers_preserved(self):
         self.assertEqual(self.check("<!-- ignoru --> <b>espe-</b>\nranto"), [])
-        findings = self.check("<p>espe-\nranto</p>")
+        findings = self.check("<p>esper-\nanto</p>")
         self.assertEqual(len(findings), 1)
         self.assertEqual(findings[0][0], 1)
 
-    def test_hyphen_without_following_line_word_is_ignored(self):
+    def test_line_endings_and_punctuation(self):
+        self.assertEqual(self.check("pa-\r\ntro"), [])
+        findings = self.check("Teksto:\r\nesper-\r\nanto")
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0][0], 2)
+
+    def test_hyphen_without_following_word_is_ignored(self):
         self.assertEqual(self.check("esper-\n"), [])
         self.assertEqual(self.check("vort-aro"), [])
+
+    def test_dictionary_unknown_words_are_ignored(self):
+        self.assertEqual(self.check("nekonata-\nvorto"), [])
 
 
 if __name__ == "__main__":
