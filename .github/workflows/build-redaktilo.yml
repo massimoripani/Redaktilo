@@ -1,17 +1,58 @@
+
 name: Build Redaktilo
 
 on:
   push:
     branches: [main]
-    tags: ["v*"]
   pull_request:
     branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
+
+  # Genera una sola volta le note della release.
+  release-notes:
+    name: Genera le note di rilascio
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Genera WHATS_NEW.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          printf '# Redaktilo %s\n\n' "$VERSION" > WHATS_NEW.txt
+
+          gh api --method POST \
+            "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+            -f tag_name="$GITHUB_REF_NAME" \
+            -f target_commitish="$GITHUB_SHA" \
+            --jq .body >> WHATS_NEW.txt
+
+      - name: Carica le note
+        uses: actions/upload-artifact@v6
+        with:
+          name: release-notes
+          path: WHATS_NEW.txt
+          if-no-files-found: error
+
+  # Compila Redaktilo per i tre sistemi operativi.
   build:
     name: Build (${{ matrix.name }})
+    needs: release-notes
+    if: ${{ !cancelled() && (needs.release-notes.result == 'success' || needs.release-notes.result == 'skipped') }}
+
     runs-on: ${{ matrix.os }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -25,62 +66,96 @@ jobs:
 
     steps:
       - name: Checkout del codice
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
-      - name: Dipendenze di sistema (solo Linux, per tkinter)
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y python3-tk tk-dev
+      - name: Determina la versione
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="dev-${GITHUB_SHA:0:7}"
+          fi
 
-      # Lo script .bat termina con "pause": "< nul" evita che resti in attesa di un tasto.
-      - name: Build con konstrui_exe.bat (Windows)
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Dipendenze di sistema Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk tk-dev
+
+      - name: Scarica le note di rilascio
+        if: github.event_name == 'release' && startsWith(github.ref_name, 'v')
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+          path: .
+
+      - name: Build Windows
         if: runner.os == 'Windows'
         shell: cmd
         run: call konstrui_exe.bat < nul
 
-      - name: Build con konstrui_exe.sh (Linux/macOS)
+      - name: Build Linux/macOS
         if: runner.os != 'Windows'
         run: sh konstrui_exe.sh
 
-      - name: Comprimi (Windows)
+      - name: Inserisce le note nel programma
+        if: github.event_name == 'release' && startsWith(github.ref_name, 'v')
+        shell: bash
+        run: cp WHATS_NEW.txt dist/Redaktilo/WHATS_NEW.txt
+
+      - name: Comprimi Windows
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Compress-Archive -Path dist/Redaktilo -DestinationPath Redaktilo-${{ matrix.name }}.zip
+        run: |
+          Compress-Archive `
+            -Path dist/Redaktilo `
+            -DestinationPath "Redaktilo-$env:VERSION-windows.zip" `
+            -Force
 
-      - name: Comprimi (Linux/macOS)
+      - name: Comprimi Linux/macOS
         if: runner.os != 'Windows'
         run: |
-          cd dist
-          zip -r -y ../Redaktilo-${{ matrix.name }}.zip Redaktilo
+          tar -czf "Redaktilo-${VERSION}-${{ matrix.name }}.tar.gz" \
+            -C dist Redaktilo
 
       - name: Carica l'artefatto
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v6
         with:
-          name: Redaktilo-${{ matrix.name }}
-          path: Redaktilo-${{ matrix.name }}.zip
+          name: build-${{ matrix.name }}
+          path: Redaktilo-*-${{ matrix.name }}.*
           if-no-files-found: error
 
+  # Aggiorna la Release già pubblicata, allegando i pacchetti.
   release:
-    name: Pubblica la Release
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    name: Pubblica i pacchetti
+    needs: [build, release-notes]
+    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Scarica gli artefatti
+      - name: Scarica tutti gli artefatti
         uses: actions/download-artifact@v7
         with:
-          path: artefatti
+          path: release-assets
           merge-multiple: true
 
-      - name: Crea la Release
-        uses: softprops/action-gh-release@v2
+      - name: Aggiorna la Release GitHub
+        uses: softprops/action-gh-release@v3
         with:
-          files: artefatti/*.zip
-          generate_release_notes: true
+          tag_name: ${{ github.event.release.tag_name }}
+          name: Redaktilo ${{ github.event.release.tag_name }}
+          body_path: release-assets/WHATS_NEW.txt
+          files: |
+            release-assets/Redaktilo-*.zip
+            release-assets/Redaktilo-*.tar.gz
+          fail_on_unmatched_files: true
