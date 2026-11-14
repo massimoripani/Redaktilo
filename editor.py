@@ -65,7 +65,7 @@ def _config_dir():
 
 CONFIG_DIR = _config_dir()
 KEYS_FILE = os.path.join(CONFIG_DIR, "klavkombinoj.json")
-SETTINGS_FILE = os.path.join(CONFIG_DIR, "agordoj.json")
+SETTINGS_FILE = os.path.join(CONFIG_DIR, "settings.json")
 LANG_DIR = os.path.join(BASE, "lingvoj")      # pacchetti linguistici: lingvoj/<kodo>.json
 DEFAULT_LANG = "eo"
 
