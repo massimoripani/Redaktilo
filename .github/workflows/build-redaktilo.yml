@@ -1,5 +1,5 @@
 
-name: Build Redaktilo
+name: Build Redaktilo v.2.0
 
 on:
   push:
