@@ -58,7 +58,7 @@ jobs:
           zip -r -y ../Redaktilo-${{ matrix.name }}.zip Redaktilo
 
       - name: Carica l'artefatto
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: Redaktilo-${{ matrix.name }}
           path: Redaktilo-${{ matrix.name }}.zip
@@ -74,7 +74,7 @@ jobs:
 
     steps:
       - name: Scarica gli artefatti
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           path: artefatti
           merge-multiple: true
