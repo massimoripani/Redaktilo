@@ -1,5 +1,5 @@
 
-name: Build Redaktilo v.2.0
+name: Build Redaktilo v.3
 
 on:
   push:
@@ -22,16 +22,15 @@ on:
 permissions:
   contents: read
 
-# Evita che due esecuzioni sullo stesso riferimento
-# lavorino contemporaneamente.
+# Evita esecuzioni contemporanee per la stessa Release.
 concurrency:
-  group: redaktilo-${{ github.ref }}
+  group: redaktilo-${{ github.event.release.tag_name || inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
 
   # --------------------------------------------------
-  # GENERAZIONE NOTE DI RILASCIO
+  # GENERAZIONE WHATS_NEW.TXT
   # --------------------------------------------------
 
   release-notes:
@@ -51,21 +50,49 @@ jobs:
       contents: write
 
     env:
-      RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || (github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.tag || github.ref_name) }}
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
 
     steps:
-      - name: Genera WHATS_NEW.txt
+      - name: Genera WHATS_NEW.txt dalle Release Notes
         env:
           GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
+          set -euo pipefail
+
+          if [[ -z "$RELEASE_TAG" || "$RELEASE_TAG" != v* ]]; then
+            echo "Tag Release non valido: $RELEASE_TAG"
+            exit 1
+          fi
+
           VERSION="${RELEASE_TAG#v}"
 
-          printf '# Redaktilo %s\n\n' "$VERSION" > WHATS_NEW.txt
+          # Prima prova a recuperare le note già presenti
+          # nella Release pubblicata tramite l'interfaccia GitHub.
+          BODY=""
 
-          gh api --method POST \
-            "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
-            -f tag_name="$RELEASE_TAG" \
-            --jq .body >> WHATS_NEW.txt
+          if BODY=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" \
+            --jq '.body // ""' 2>/dev/null); then
+            :
+          fi
+
+          # Se la Release non esiste ancora o non contiene note,
+          # genera automaticamente le note di rilascio.
+          if [[ -z "$BODY" ]]; then
+            BODY=$(gh api --method POST \
+              "repos/${GITHUB_REPOSITORY}/releases/generate-notes" \
+              -f tag_name="$RELEASE_TAG" \
+              --jq '.body')
+          fi
+
+          {
+            printf '# Redaktilo %s\n\n' "$VERSION"
+            printf '%s\n' "$BODY"
+          } > WHATS_NEW.txt
+
+          echo "Note generate per Redaktilo $VERSION"
+          cat WHATS_NEW.txt
 
       - name: Carica le note
         uses: actions/upload-artifact@v6
@@ -105,28 +132,21 @@ jobs:
             name: macos
 
     env:
-      RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || (github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.tag || github.ref_name) }}
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
 
     steps:
 
       - name: Checkout del codice
         uses: actions/checkout@v7
         with:
-          ref: ${{ (github.event_name == 'release' && github.event.release.tag_name) || (github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.tag) || github.ref }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
+          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
 
       - name: Determina la versione
         shell: bash
         run: |
-          if [[ "$RELEASE_TAG" == v* ]] && {
-            [[ "$GITHUB_REF_TYPE" == "tag" ]] ||
-            [[ "$GITHUB_EVENT_NAME" == "release" ]] ||
-            [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" && -n "${{ inputs.tag }}" ]]
-          }; then
+          set -euo pipefail
+
+          if [[ -n "$RELEASE_TAG" && "$RELEASE_TAG" == v* ]]; then
             VERSION="${RELEASE_TAG#v}"
           else
             VERSION="dev-${GITHUB_SHA:0:7}"
@@ -134,11 +154,22 @@ jobs:
 
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
+          echo "Versione del pacchetto: $VERSION"
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
       - name: Dipendenze di sistema Linux
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-tk tk-dev
+
+      # ----------------------------------------------
+      # SCARICAMENTO WHATS_NEW.TXT
+      # ----------------------------------------------
 
       - name: Scarica le note di rilascio
         if: needs.release-notes.result == 'success'
@@ -147,29 +178,54 @@ jobs:
           name: release-notes
           path: .
 
+      - name: Prepara WHATS_NEW.txt
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ ! -f WHATS_NEW.txt ]]; then
+            printf '# Redaktilo %s\n\nBuild di sviluppo.\n' \
+              "$VERSION" > WHATS_NEW.txt
+          fi
+
+          mkdir -p dist/Redaktilo
+
+          cp WHATS_NEW.txt dist/Redaktilo/WHATS_NEW.txt
+
+      # ----------------------------------------------
       # BUILD WINDOWS
+      # ----------------------------------------------
 
       - name: Build Windows
         if: runner.os == 'Windows'
         shell: cmd
         run: call konstrui_exe.bat < nul
 
+      # ----------------------------------------------
       # BUILD LINUX / MACOS
+      # ----------------------------------------------
 
       - name: Build Linux/macOS
         if: runner.os != 'Windows'
+        shell: bash
         run: sh konstrui_exe.sh
 
-      - name: Inserisce le note nel programma
-        if: needs.release-notes.result == 'success'
+      # ----------------------------------------------
+      # WHATS_NEW DENTRO IL PROGRAMMA
+      # ----------------------------------------------
+
+      - name: Inserisce WHATS_NEW.txt nel pacchetto
         shell: bash
         run: |
+          set -euo pipefail
           cp WHATS_NEW.txt dist/Redaktilo/WHATS_NEW.txt
 
+      # ----------------------------------------------
       # ARCHIVIO WINDOWS
+      # ----------------------------------------------
 
       - name: Comprimi Windows
-        if: runner.os == 'Windows'
+        if: matrix.name == 'windows'
         shell: pwsh
         run: |
           Compress-Archive `
@@ -177,15 +233,22 @@ jobs:
             -DestinationPath "Redaktilo-$env:VERSION-windows.zip" `
             -Force
 
+      # ----------------------------------------------
       # ARCHIVI LINUX / MACOS
+      # ----------------------------------------------
 
       - name: Comprimi Linux/macOS
-        if: runner.os != 'Windows'
+        if: matrix.name != 'windows'
+        shell: bash
         run: |
+          set -euo pipefail
+
           tar -czf "Redaktilo-${VERSION}-${{ matrix.name }}.tar.gz" \
             -C dist Redaktilo
 
+      # ----------------------------------------------
       # CARICAMENTO ARTEFATTI
+      # ----------------------------------------------
 
       - name: Carica l'artefatto
         uses: actions/upload-artifact@v6
@@ -206,6 +269,7 @@ jobs:
     if: >-
       always() &&
       needs.build.result == 'success' &&
+      needs.release-notes.result == 'success' &&
       (
         (github.event_name == 'release' &&
          startsWith(github.event.release.tag_name, 'v')) ||
@@ -221,23 +285,68 @@ jobs:
       contents: write
 
     env:
-      RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || (github.event_name == 'workflow_dispatch' && inputs.tag != '' && inputs.tag || github.ref_name) }}
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
 
     steps:
 
-      - name: Scarica tutti gli artefatti
+      - name: Scarica gli artefatti di compilazione
         uses: actions/download-artifact@v7
         with:
+          pattern: build-*
           path: release-assets
           merge-multiple: true
 
-      - name: Verifica gli archivi
+      - name: Scarica WHATS_NEW.txt
+        uses: actions/download-artifact@v7
+        with:
+          name: release-notes
+          path: release-assets
+
+      # ----------------------------------------------
+      # VERIFICA NOMI E PRESENZA DEI PACCHETTI
+      # ----------------------------------------------
+
+      - name: Verifica i pacchetti
+        shell: bash
         run: |
+          set -euo pipefail
+
+          VERSION="${RELEASE_TAG#v}"
+
+          echo "Controllo pacchetti della versione $VERSION"
+
           ls -lh release-assets/
-          test -f release-assets/WHATS_NEW.txt
-          test -f "release-assets/Redaktilo-${RELEASE_TAG#v}-windows.zip"
-          test -f "release-assets/Redaktilo-${RELEASE_TAG#v}-linux.tar.gz"
-          test -f "release-assets/Redaktilo-${RELEASE_TAG#v}-macos.tar.gz"
+
+          test -f "release-assets/Redaktilo-${VERSION}-windows.zip"
+          test -f "release-assets/Redaktilo-${VERSION}-linux.tar.gz"
+          test -f "release-assets/Redaktilo-${VERSION}-macos.tar.gz"
+          test -f "release-assets/WHATS_NEW.txt"
+
+          echo "Tutti e tre i pacchetti sono presenti."
+
+      # ----------------------------------------------
+      # CHECKSUM SHA256
+      # ----------------------------------------------
+
+      - name: Genera SHA256SUMS.txt
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cd release-assets
+
+          sha256sum \
+            "Redaktilo-${RELEASE_TAG#v}-windows.zip" \
+            "Redaktilo-${RELEASE_TAG#v}-linux.tar.gz" \
+            "Redaktilo-${RELEASE_TAG#v}-macos.tar.gz" \
+            > SHA256SUMS.txt
+
+          echo "Checksum generati:"
+          cat SHA256SUMS.txt
+
+      # ----------------------------------------------
+      # PUBBLICAZIONE RELEASE
+      # ----------------------------------------------
 
       - name: Aggiorna la Release GitHub
         uses: softprops/action-gh-release@v3
@@ -248,4 +357,6 @@ jobs:
           files: |
             release-assets/Redaktilo-*.zip
             release-assets/Redaktilo-*.tar.gz
+            release-assets/WHATS_NEW.txt
+            release-assets/SHA256SUMS.txt
           fail_on_unmatched_files: true
