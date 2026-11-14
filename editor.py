@@ -30,6 +30,8 @@ import monato_common as mc  # noqa: E402
 APP_NAME = "Redaktilo"
 VERSION = "2.32"
 CATEGORY_ORDER = ["Konvertiloj", "Kontroliloj", "Literumilo", "Aliaj iloj"]
+DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
+DEFAULT_FONT_SIZE = 12
 
 X_MAP = {"c": "ĉ", "g": "ĝ", "h": "ĥ", "j": "ĵ", "s": "ŝ", "u": "ŭ",
          "C": "Ĉ", "G": "Ĝ", "H": "Ĥ", "J": "Ĵ", "S": "Ŝ", "U": "Ŭ"}
@@ -345,14 +347,14 @@ REGULAJ ESPRIMOJ  (se la skatolo estas markita)
   .  ajna signo (ne novlinio)    ^  linikomenco    $  linifino    \\b  vortlimo
   \\d  cifero    \\w  litero/cifero    \\s  spaco    [abc]  unu el    [^abc]  neniu el
   *  0 aŭ pli    +  1 aŭ pli    ?  0 aŭ 1    {2,4}  2 ĝis 4    a|b  a aŭ b
-  (…)  grupo; en «Anstataŭigi per»:  \\1  \\2  aŭ  \\g<nomo>
+  (…)  gruppo; en «Anstataŭigi per»:  \\1  \\2  aŭ  \\g<nomo>
   [\\s\\S]  ĉiu signo, ankaŭ novlinio       (?s)  ĉe la komenco: la punkto trovas ankaŭ novliniojn
 
 EKZEMPLOJ
   Forigi finajn spacojn:      serĉi  [ \\t]+$      anstataŭigi per  (nenio)
   Unu alineo → unu linio:     serĉi  \\n\\n        anstataŭigi per  \\n
   Meti <p> ĉirkaŭ ĉiu linio:  serĉi  ^(.+)$     anstataŭigi per  <p>\\1</p>
- """
+  """
 
 # =====================================================================
 # Contesto passato ai plugin
@@ -552,7 +554,19 @@ class App:
         for pth in ([path] if isinstance(path, str) else (path or [])):
             self.open_file(pth)
 
-    # ------------------------------------------------------------ interfaccia
+    def _choose_font_family(self, preferred=None):
+        candidates = []
+        if preferred:
+            candidates.append(preferred)
+        candidates.extend(("Consolas", "DejaVu Sans Mono", "Courier New", "Liberation Mono", "Monospace"))
+        for fam in candidates:
+            if fam in tkfont.families():
+                return fam
+        try:
+            return tkfont.nametofont("TkFixedFont")["family"]
+        except Exception:
+            return DEFAULT_FONT_FAMILY
+
     def _build_ui(self):
         r = self.root
         r.geometry("1000x700")
@@ -563,11 +577,15 @@ class App:
         self.main = ttk.Frame(r)
         self.main.pack(side="top", fill="both", expand=True)
 
-        self.font = tkfont.Font(family="DejaVu Sans Mono", size=12)
-        for fam in ("Consolas", "DejaVu Sans Mono", "Courier New"):
-            if fam in tkfont.families():
-                self.font.configure(family=fam)
-                break
+        settings = load_settings()
+        family = self._choose_font_family(settings.get("editor_font_family"))
+        size = settings.get("editor_font_size", DEFAULT_FONT_SIZE)
+        try:
+            size = int(size)
+        except (TypeError, ValueError):
+            size = DEFAULT_FONT_SIZE
+        size = max(8, min(48, size))
+        self.font = tkfont.Font(family=family, size=size)
 
         self.nb = ttk.Notebook(self.main)
         self.nb.pack(fill="both", expand=True)
@@ -613,6 +631,66 @@ class App:
         f = self.font.copy()
         f.configure(slant="italic")
         return f
+
+    def _update_font(self):
+        if not hasattr(self, "font"):
+            return
+        for doc in self.docs:
+            doc.text.configure(font=self.font)
+            doc.text.tag_configure("comment", foreground="#2e7d32", font=self._italic())
+        if hasattr(self, "report_list"):
+            self.report_list.configure(font=self.font)
+
+    def set_font(self, family, size, save=True):
+        fam = self._choose_font_family(family)
+        try:
+            size_value = max(8, min(48, int(size)))
+        except (TypeError, ValueError):
+            size_value = DEFAULT_FONT_SIZE
+        self.font.configure(family=fam, size=size_value)
+        self._update_font()
+        if save:
+            settings = load_settings()
+            settings["editor_font_family"] = fam
+            settings["editor_font_size"] = size_value
+            try:
+                save_settings(settings)
+            except OSError as e:
+                show_error(self.root, tr("Ne eblas konservi:\n{e}").format(e=e))
+
+    def font_dialog(self):
+        d = tk.Toplevel(self.root)
+        d.title(tr("Fonto"))
+        d.transient(self.root)
+        d.resizable(False, False)
+        family_var = tk.StringVar(value=self.font.cget("family"))
+        size_var = tk.StringVar(value=str(self.font.cget("size")))
+
+        ttk.Label(d, text=tr("Fonto:")).grid(row=0, column=0, padx=8, pady=(10, 4), sticky="e")
+        families = sorted(set(tkfont.families()))
+        combo = ttk.Combobox(d, textvariable=family_var, values=families, state="readonly", width=28)
+        combo.grid(row=0, column=1, padx=8, pady=(10, 4), sticky="w")
+        ttk.Label(d, text=tr("Grando:")).grid(row=1, column=0, padx=8, pady=(4, 10), sticky="e")
+        ttk.Entry(d, textvariable=size_var, width=8).grid(row=1, column=1, padx=8, pady=(4, 10), sticky="w")
+
+        def apply():
+            try:
+                size = int(size_var.get())
+            except ValueError:
+                show_error(self.root, tr("Nevalida grando de tiparo."))
+                return
+            self.set_font(family_var.get(), size)
+            d.destroy()
+
+        buttons = ttk.Frame(d)
+        buttons.grid(row=2, column=0, columnspan=2, pady=(0, 10))
+        ttk.Button(buttons, text=tr("Bone"), command=apply).pack(side="left", padx=5)
+        ttk.Button(buttons, text=tr("Nuligi"), command=d.destroy).pack(side="left", padx=5)
+        d.bind("<Return>", lambda e: apply())
+        d.bind("<Escape>", lambda e: d.destroy())
+        d.grab_set()
+        d.focus_force()
+        d.wait_window()
 
     def _build_menus(self):
         r = self.root
@@ -660,6 +738,7 @@ class App:
         m.add_checkbutton(label=tr("Aŭtomata linifaldo"), variable=self.wrap, command=self._toggle_wrap)
         m.add_checkbutton(label=tr("Kolorigi etikedojn"), variable=self.highlight_on, command=lambda: [self._schedule_highlight(d) for d in self.docs])
         m.add_separator()
+        m.add_command(label=tr("Fonto…"), command=self.font_dialog)
         self._add_cmd(m, "opcioj.klavoj")
         lm = tk.Menu(m, tearoff=0)
         self._lang_var = tk.StringVar(value=CURRENT_LANG)
