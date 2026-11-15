@@ -78,6 +78,13 @@ DEFAULT_LANG = "eo"
 _TR = {}
 CURRENT_LANG = DEFAULT_LANG
 
+# Tradukoj de ĉenoj de la menuo "Vido → Skalo" kiuj povas manki en lingvoj/*.json
+# (se la dosiero de la lingvo havas tiujn ĉenojn, ĝi gajnas).
+_FALLBACK_TR = {
+    "it": {"Vido": "Visualizza", "Skalo": "Scaling"},
+    "en": {"Vido": "View", "Skalo": "Scaling"},
+}
+
 
 def tr(s):
     """Traduko de ĉeno (se mankas, la originala Esperanta teksto)."""
@@ -120,6 +127,8 @@ def load_language(code):
                 pass
     _TR = {k: v for k, v in table.items() if v}
     CURRENT_LANG = code if table else DEFAULT_LANG
+    for k, v in _FALLBACK_TR.get(CURRENT_LANG, {}).items():
+        _TR.setdefault(k, v)
 
 
 def load_settings():
@@ -138,6 +147,42 @@ def save_settings(data):
 
 
 load_language(os.environ.get("REDAKTILO_LINGVO") or load_settings().get("lingvo", DEFAULT_LANG))
+
+# ---------------------------------------------------------------- skalo
+# Tutta l'interfaccia deriva da un solo fattore globale (UI_SCALE). Le dimensioni "base"
+# (font, pixel) restano sempre quelle al 100%: ogni cambio di scala le ricalcola da zero,
+# quindi gli ingrandimenti non si accumulano.
+SCALE_VALUES = list(range(75, 301, 25))      # 100%, 125%, ... 400%
+DEFAULT_SCALE = 100
+SCALE_SETTING = "interfaca_skalo"             # chiave in settings.json (percentuale intera)
+
+
+def normalize_scale(value):
+    """Valore salvato -> percentuale valida (100..400, passi di 25); altrimenti 100."""
+    try:
+        v = int(round(float(value)))
+    except (TypeError, ValueError, OverflowError):
+        return DEFAULT_SCALE
+    return v if v in SCALE_VALUES else DEFAULT_SCALE
+
+
+UI_SCALE = normalize_scale(load_settings().get(SCALE_SETTING, DEFAULT_SCALE)) / 100.0
+
+
+def sc(n):
+    """Dimensione in pixel (valore al 100%) -> valore col fattore di scala corrente."""
+    v = int(round(n * UI_SCALE))
+    return max(1, v) if n > 0 else v
+
+
+def scale_font_size(size):
+    """Grandezza di font (punti positivi o pixel negativi) col fattore di scala corrente."""
+    v = max(1, int(round(abs(size) * UI_SCALE)))
+    return v if size >= 0 else -v
+
+
+_NAMED_FONTS = ("TkDefaultFont", "TkTextFont", "TkFixedFont", "TkMenuFont", "TkHeadingFont",
+                "TkCaptionFont", "TkSmallCaptionFont", "TkIconFont", "TkTooltipFont")
 
 _MOD_NAMES = {"Control": "Ctrl", "Alt": "Alt", "Shift": "Shift", "Mod1": "Alt",
               "Command": "Cmd", "Meta": "Alt"}
@@ -220,13 +265,15 @@ def ask_dialog(parent, title, text, buttons, entry=None, default=0):
     buttons = [tr(b) for b in buttons]
     res = {"btn": None, "text": None}
     var = tk.StringVar(value=entry or "")
-    ttk.Label(d, text=tr(text), justify="left", wraplength=480, padding=(16, 14)).pack()
+    wrap = min(sc(480), int(d.winfo_screenwidth() * 0.8))      # mai più largo dello schermo
+    ttk.Label(d, text=tr(text), justify="left", wraplength=wrap,
+              padding=(sc(16), sc(14))).pack()
     e = None
     if entry is not None:
         e = ttk.Entry(d, textvariable=var, width=50)
-        e.pack(padx=16, pady=(0, 8))
+        e.pack(padx=sc(16), pady=(0, sc(8)))
     bar = ttk.Frame(d)
-    bar.pack(pady=(0, 12))
+    bar.pack(pady=(0, sc(12)))
 
     def press(i):
         res["btn"], res["text"] = i, var.get()
@@ -235,7 +282,7 @@ def ask_dialog(parent, title, text, buttons, entry=None, default=0):
     default_btn = None
     for i, b in enumerate(buttons):
         btn = ttk.Button(bar, text=b, command=lambda i=i: press(i))
-        btn.pack(side="left", padx=5)
+        btn.pack(side="left", padx=sc(5))
         if i == default:
             default_btn = btn
     d.bind("<Return>", lambda ev: press(default))
@@ -415,6 +462,16 @@ class Context:
     def status(self, msg):
         self._app.set_status_message(tr(msg))
 
+    # --- skalo de la interfaco (por kromprogramoj kun propraj fenestroj) ---
+    @property
+    def scale(self):
+        """Fattore di scala corrente dell'interfaccia (1.0 = 100%)."""
+        return UI_SCALE
+
+    def sc(self, pixels):
+        """Dimensione in pixel al 100% -> dimensione con la scala corrente (margini, geometry...)."""
+        return sc(pixels)
+
     # --- per plugin interattivi (es. literumilo) ---
     @property
     def root(self):
@@ -457,17 +514,18 @@ class Document:
         Document._counter += 1
         self.number = Document._counter
         self.frame = ttk.Frame(parent)
-        self.gutter = tk.Canvas(self.frame, width=48, highlightthickness=0, bg="#f0f0f0")
+        self.gutter = tk.Canvas(self.frame, highlightthickness=0, bg="#f0f0f0")
         self.gutter.pack(side="left", fill="y")
         self.vsb = ttk.Scrollbar(self.frame, orient="vertical")
         self.vsb.pack(side="right", fill="y")
         # ogni Text ha la propria cronologia undo/redo
         self.text = tk.Text(self.frame, undo=True, autoseparators=True, maxundo=-1,
                             wrap="word" if app.wrap.get() else "none", font=app.font,
-                            padx=6, pady=4, borderwidth=0, highlightthickness=0, spacing1=1,
-                            insertwidth=2, selectbackground="#b4d5fe",
+                            borderwidth=0, highlightthickness=0,
+                            selectbackground="#b4d5fe",
                             selectforeground="black", inactiveselectbackground="#d0d0d0")
         self.text.pack(side="left", fill="both", expand=True)
+        self.apply_metrics()
         self.vsb.configure(command=self.text.yview)
         self.text.tag_configure("tag", foreground="#1f5fbf")
         self.text.tag_configure("unknown", foreground="#c00000", underline=True)
@@ -486,11 +544,50 @@ class Document:
         self._report_items = []
         self._report_title = ""
 
+    def apply_metrics(self):
+        """Dimensioni in pixel (margine numeri di riga, padding, cursore) col fattore corrente."""
+        self.gutter.configure(width=sc(48))
+        self.text.configure(padx=sc(6), pady=sc(4), spacing1=sc(1), insertwidth=sc(2))
+
     def display_name(self):
         if self.path:
             return os.path.basename(self.path)
         n = tr("sennoma")
         return n if self.number == 1 else f"{n} {self.number}"
+
+
+class MenuBar(tk.Frame):
+    """Barra dei menu disegnata da Redaktilo (al posto di quella nativa del sistema).
+
+    Espone add_cascade(label=, menu=) come tk.Menu, così _build_menus() resta invariato.
+    Font (TkDefaultFont) e spaziature seguono la scala globale, cosa impossibile con la barra nativa."""
+
+    def __init__(self, parent):
+        super().__init__(parent, borderwidth=1, relief="groove")
+        self._buttons = []
+
+    def add_cascade(self, label, menu):
+        btn = tk.Label(self, text=label, anchor="w", borderwidth=0)
+        btn.pack(side="left")
+        normal = btn.cget("background")
+        btn.bind("<Enter>", lambda e, b=btn: b.configure(background="#c9def5"))
+        btn.bind("<Leave>", lambda e, b=btn, n=normal: b.configure(background=n))
+        btn.bind("<Button-1>", lambda e, b=btn, m=menu: self._open(b, m))
+        self._buttons.append(btn)
+        self.apply_metrics()
+
+    def _open(self, btn, menu):
+        """Apre la tendina sotto il pulsante (si chiude con un clic fuori o con Esc)."""
+        x = btn.winfo_rootx()
+        y = btn.winfo_rooty() + btn.winfo_height()
+        try:
+            menu.tk_popup(x, y)
+        finally:
+            menu.grab_release()
+
+    def apply_metrics(self):
+        for btn in self._buttons:
+            btn.configure(padx=sc(8), pady=sc(3))
 
 
 def _proxy(attr):
@@ -541,6 +638,19 @@ class App:
         self.user_keys = load_user_keys()
         self.ctx = Context(self)
 
+        # skalo: le dimensioni di base (100%) si leggono UNA volta, prima di ogni modifica
+        self._scale_percent = int(round(UI_SCALE * 100))
+        self.scale_var = tk.IntVar(value=self._scale_percent)
+        self._base_fonts = self._capture_base_fonts()
+        self._style_base = {}
+        self._styles_touched = False
+        self._apply_named_fonts()
+        self._apply_styles()
+        # font esplicito per tutti i menu a tendina (su Windows i menu non seguono da soli i cambi di scala)
+        self._menu_base = self._base_fonts.get("TkMenuFont", 9)
+        self._menu_font = tkfont.nametofont("TkMenuFont").copy()
+        self._menu_font.configure(size=scale_font_size(self._menu_base))
+
         self._build_ui()
         self._register_builtin_commands()
         self._build_menus()
@@ -553,6 +663,170 @@ class App:
         self._update_status()
         for pth in ([path] if isinstance(path, str) else (path or [])):
             self.open_file(pth)
+
+    # ------------------------------------------------------------- skalo
+    def _capture_base_fonts(self):
+        """Grandezze dei font nominati di Tk al 100% (positive = punti, negative = pixel)."""
+        base = {}
+        for name in _NAMED_FONTS:
+            try:
+                base[name] = int(tkfont.nametofont(name).cget("size"))
+            except (tk.TclError, ValueError, TypeError):
+                pass
+        return base
+
+    def _apply_named_fonts(self):
+        """Font predefiniti di Tk (widget, menu, schede, intestazioni...): base * fattore."""
+        for name, size in self._base_fonts.items():
+            try:
+                tkfont.nametofont(name).configure(size=scale_font_size(size))
+            except tk.TclError:
+                pass
+
+    def _apply_menu_fonts(self, widget=None):
+        """Applica il font scalato a tutti i menu (principali, sottomenu, plugin, menu contestuali)."""
+        if widget is None:
+            self._menu_font.configure(size=scale_font_size(self._menu_base))
+            widget = self.root
+        for child in widget.winfo_children():
+            if isinstance(child, tk.Menu):
+                try:
+                    child.configure(font=self._menu_font)
+                except tk.TclError:
+                    pass
+            self._apply_menu_fonts(child)
+
+    def _style_metric(self, style, name, option, fallback):
+        """Valore di base (100%) di un'opzione ttk, letto una sola volta e poi memorizzato."""
+        key = (name, option)
+        if key not in self._style_base:
+            val = None
+            try:
+                raw = str(style.lookup(name, option) or "")
+                parts = [float(x) for x in self.root.tk.splitlist(raw)]
+                val = tuple(parts) if parts else None
+            except (tk.TclError, ValueError):
+                val = None
+            self._style_base[key] = val or fallback
+        return self._style_base[key]
+
+    def _apply_styles(self):
+        """Margini interni e dimensioni dei widget ttk. Al 100% (e mai toccati) lo stile del tema resta intatto."""
+        if UI_SCALE == 1.0 and not self._styles_touched:
+            return
+        self._styles_touched = True
+        st = ttk.Style(self.root)
+        for name, fallback in (("TButton", (3, 3)), ("TEntry", (2, 2)),
+                               ("TCombobox", (2, 2)), ("TNotebook.Tab", (4, 2))):
+            vals = self._style_metric(st, name, "padding", fallback)
+            try:
+                st.configure(name, padding=[sc(v) for v in vals])
+            except tk.TclError:
+                pass
+        try:
+            rh = self._style_metric(st, "Treeview", "rowheight", (20.0,))[0]
+            line = tkfont.nametofont("TkDefaultFont").metrics("linespace")
+            st.configure("Treeview", rowheight=max(sc(rh), line + sc(2)))
+        except tk.TclError:
+            pass
+        for name in ("Vertical.TScrollbar", "Horizontal.TScrollbar"):
+            try:
+                size = self._style_metric(st, name, "arrowsize", (15.0,))[0]
+                st.configure(name, arrowsize=sc(size))
+            except tk.TclError:
+                pass
+
+    def _apply_metrics(self):
+        """Margini/padding in pixel dei widget permanenti, sempre ricalcolati dalla base."""
+        if hasattr(self, "menubar"):
+            self.menubar.apply_metrics()
+        self.status.configure(padding=(sc(8), sc(3)))
+        self.panel_title.pack_configure(padx=sc(6), pady=sc(2))
+        self._btn_close.pack_configure(padx=sc(4))
+        self._btn_save.pack_configure(padx=sc(2))
+        self._btn_copy.pack_configure(padx=sc(2))
+        for doc in self.docs:
+            doc.apply_metrics()
+
+    def _fit_size(self, w, h):
+        """Limita una dimensione di finestra allo schermo."""
+        sw, sh = self.root.winfo_screenwidth(), self.root.winfo_screenheight()
+        return max(1, min(int(w), int(sw * 0.95))), max(1, min(int(h), int(sh * 0.9)))
+
+    def _resize_window(self, old):
+        """Adegua la finestra principale al nuovo fattore (non se massimizzata/ridotta a icona)."""
+        try:
+            if self.root.state() != "normal":
+                return
+        except tk.TclError:
+            return
+        ratio = UI_SCALE / old if old else 1.0
+        self.root.update_idletasks()
+        w = max(int(self.root.winfo_width() * ratio), sc(640))
+        h = max(int(self.root.winfo_height() * ratio), sc(480))
+        nw, nh = self._fit_size(w, h)
+        try:
+            self.root.geometry(f"{nw}x{nh}")
+        except tk.TclError:
+            pass
+
+    def _reopen_dialogs(self):
+        """Le finestre non modali già aperte (cerca, klavkombinoj) si ricostruiscono con la nuova scala."""
+        fd = getattr(self, "_fd", None)
+        if fd is not None and fd.winfo_exists():
+            x, y = fd.winfo_x(), fd.winfo_y()
+            keep = self._find_var.get()
+            fd.destroy()
+            self.find_dialog()
+            self._find_var.set(keep)
+            try:
+                self._fd.geometry(f"+{max(x, 0)}+{max(y, 0)}")
+            except tk.TclError:
+                pass
+        sd = getattr(self, "_sd", None)
+        if sd is not None and sd.winfo_exists():
+            x, y = sd.winfo_x(), sd.winfo_y()
+            sd.destroy()
+            self.shortcuts_dialog()
+            try:
+                self._sd.geometry(f"+{max(x, 0)}+{max(y, 0)}")
+            except tk.TclError:
+                pass
+
+    def _apply_scale(self, old):
+        self._apply_named_fonts()
+        self._apply_menu_fonts()
+        self.font.configure(size=scale_font_size(self.font_base_size))
+        self._title_font.configure(size=scale_font_size(10))
+        self._update_font()
+        self._apply_styles()
+        self._apply_metrics()
+        self.root.update_idletasks()
+        self._resize_window(old)
+        self._reopen_dialogs()
+        self.root.update_idletasks()
+        for doc in self.docs:
+            self._redraw_gutter(doc)
+
+    def set_scale(self, percent, save=True):
+        """Imposta la scala dell'interfaccia (percentuale 100..400) e la applica subito."""
+        global UI_SCALE
+        percent = normalize_scale(percent)
+        self.scale_var.set(percent)
+        if percent == self._scale_percent:
+            return
+        old = UI_SCALE
+        UI_SCALE = percent / 100.0
+        self._scale_percent = percent
+        self._apply_scale(old)
+        if save:
+            settings = load_settings()
+            settings[SCALE_SETTING] = percent
+            try:
+                save_settings(settings)
+            except OSError as e:
+                show_error(self.root, tr("Ne eblas konservi:\n{e}").format(e=e))
+        self.set_status_message(f"{percent}%")
 
     def _choose_font_family(self, preferred=None):
         candidates = []
@@ -569,9 +843,9 @@ class App:
 
     def _build_ui(self):
         r = self.root
-        r.geometry("1000x700")
+        r.geometry("%dx%d" % self._fit_size(sc(1000), sc(700)))
 
-        self.status = ttk.Label(r, anchor="w", padding=(8, 3), relief="sunken")
+        self.status = ttk.Label(r, anchor="w", relief="sunken")
         self.status.pack(side="bottom", fill="x")
 
         self.main = ttk.Frame(r)
@@ -585,7 +859,9 @@ class App:
         except (TypeError, ValueError):
             size = DEFAULT_FONT_SIZE
         size = max(8, min(48, size))
-        self.font = tkfont.Font(family=family, size=size)
+        self.font_base_size = size                       # grandezza scelta dall'utente (senza scala)
+        self.font = tkfont.Font(family=family, size=scale_font_size(size))
+        self._title_font = tkfont.Font(family="TkDefaultFont", size=scale_font_size(10), weight="bold")
 
         self.nb = ttk.Notebook(self.main)
         self.nb.pack(fill="both", expand=True)
@@ -601,11 +877,14 @@ class App:
         self.panel = ttk.Frame(r)
         head = ttk.Frame(self.panel)
         head.pack(fill="x")
-        self.panel_title = ttk.Label(head, text="", font=("TkDefaultFont", 10, "bold"))
-        self.panel_title.pack(side="left", padx=6, pady=2)
-        ttk.Button(head, text="✕", width=3, command=self.hide_report).pack(side="right", padx=4)
-        ttk.Button(head, text=tr("Konservi…"), command=self.report_save).pack(side="right", padx=2)
-        ttk.Button(head, text=tr("Kopii ĉion"), command=self.report_copy_all).pack(side="right", padx=2)
+        self.panel_title = ttk.Label(head, text="", font=self._title_font)
+        self.panel_title.pack(side="left")
+        self._btn_close = ttk.Button(head, text="✕", width=3, command=self.hide_report)
+        self._btn_close.pack(side="right")
+        self._btn_save = ttk.Button(head, text=tr("Konservi…"), command=self.report_save)
+        self._btn_save.pack(side="right")
+        self._btn_copy = ttk.Button(head, text=tr("Kopii ĉion"), command=self.report_copy_all)
+        self._btn_copy.pack(side="right")
         body = ttk.Frame(self.panel)
         body.pack(fill="both", expand=True)
         self.report_list = tk.Listbox(body, height=7, activestyle="dotbox", font=self.font,
@@ -626,6 +905,7 @@ class App:
         self._report_menu.add_command(label=tr("Konservi…"), command=self.report_save)
         for seq in ("<Button-3>", "<Button-2>"):          # tasto destro (Windows/Linux) e Mac
             self.report_list.bind(seq, self._report_popup)
+        self._apply_metrics()
 
     def _italic(self):
         f = self.font.copy()
@@ -647,7 +927,8 @@ class App:
             size_value = max(8, min(48, int(size)))
         except (TypeError, ValueError):
             size_value = DEFAULT_FONT_SIZE
-        self.font.configure(family=fam, size=size_value)
+        self.font_base_size = size_value                 # si salva sempre la grandezza senza scala
+        self.font.configure(family=fam, size=scale_font_size(size_value))
         self._update_font()
         if save:
             settings = load_settings()
@@ -664,14 +945,14 @@ class App:
         d.transient(self.root)
         d.resizable(False, False)
         family_var = tk.StringVar(value=self.font.cget("family"))
-        size_var = tk.StringVar(value=str(self.font.cget("size")))
+        size_var = tk.StringVar(value=str(self.font_base_size))
 
-        ttk.Label(d, text=tr("Fonto:")).grid(row=0, column=0, padx=8, pady=(10, 4), sticky="e")
+        ttk.Label(d, text=tr("Fonto:")).grid(row=0, column=0, padx=sc(8), pady=(sc(10), sc(4)), sticky="e")
         families = sorted(set(tkfont.families()))
         combo = ttk.Combobox(d, textvariable=family_var, values=families, state="readonly", width=28)
-        combo.grid(row=0, column=1, padx=8, pady=(10, 4), sticky="w")
-        ttk.Label(d, text=tr("Grando:")).grid(row=1, column=0, padx=8, pady=(4, 10), sticky="e")
-        ttk.Entry(d, textvariable=size_var, width=8).grid(row=1, column=1, padx=8, pady=(4, 10), sticky="w")
+        combo.grid(row=0, column=1, padx=sc(8), pady=(sc(10), sc(4)), sticky="w")
+        ttk.Label(d, text=tr("Grando:")).grid(row=1, column=0, padx=sc(8), pady=(sc(4), sc(10)), sticky="e")
+        ttk.Entry(d, textvariable=size_var, width=8).grid(row=1, column=1, padx=sc(8), pady=(sc(4), sc(10)), sticky="w")
 
         def apply():
             try:
@@ -683,9 +964,9 @@ class App:
             d.destroy()
 
         buttons = ttk.Frame(d)
-        buttons.grid(row=2, column=0, columnspan=2, pady=(0, 10))
-        ttk.Button(buttons, text=tr("Bone"), command=apply).pack(side="left", padx=5)
-        ttk.Button(buttons, text=tr("Nuligi"), command=d.destroy).pack(side="left", padx=5)
+        buttons.grid(row=2, column=0, columnspan=2, pady=(0, sc(10)))
+        ttk.Button(buttons, text=tr("Bone"), command=apply).pack(side="left", padx=sc(5))
+        ttk.Button(buttons, text=tr("Nuligi"), command=d.destroy).pack(side="left", padx=sc(5))
         d.bind("<Return>", lambda e: apply())
         d.bind("<Escape>", lambda e: d.destroy())
         d.grab_set()
@@ -694,8 +975,8 @@ class App:
 
     def _build_menus(self):
         r = self.root
-        self.menubar = tk.Menu(r)
-        r.config(menu=self.menubar)
+        self.menubar = MenuBar(r)          # barra propria: scala con l'interfaccia
+        self.menubar.pack(side="top", fill="x", before=self.main)
 
         m = tk.Menu(self.menubar, tearoff=0)
         self._add_cmd(m, "dosiero.nova")
@@ -737,6 +1018,15 @@ class App:
                           command=self._update_status)
         m.add_checkbutton(label=tr("Aŭtomata linifaldo"), variable=self.wrap, command=self._toggle_wrap)
         m.add_checkbutton(label=tr("Kolorigi etikedojn"), variable=self.highlight_on, command=lambda: [self._schedule_highlight(d) for d in self.docs])
+        self.menubar.add_cascade(label=tr("Opcioj"), menu=m)
+
+        # Vido (Visualizza): Skalo, Fonto, Klavkombinoj, Lingvo — tra "Opcioj" e "Kromprogramoj"
+        m = tk.Menu(self.menubar, tearoff=0)
+        sm = tk.Menu(m, tearoff=0)
+        for pct in SCALE_VALUES:
+            sm.add_radiobutton(label=f"{pct}%", value=pct, variable=self.scale_var,
+                               command=lambda p=pct: self.set_scale(p))
+        m.add_cascade(label=tr("Skalo"), menu=sm)
         m.add_separator()
         m.add_command(label=tr("Fonto…"), command=self.font_dialog)
         self._add_cmd(m, "opcioj.klavoj")
@@ -746,7 +1036,7 @@ class App:
             lm.add_radiobutton(label=f"{nomo}  ({code})", value=code, variable=self._lang_var,
                                command=lambda c=code: self.set_language(c))
         m.add_cascade(label=tr("Lingvo"), menu=lm)
-        self.menubar.add_cascade(label=tr("Opcioj"), menu=m)
+        self.menubar.add_cascade(label=tr("Vido"), menu=m)
 
         self.plugin_menu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label=tr("Kromprogramoj"), menu=self.plugin_menu)
@@ -754,6 +1044,7 @@ class App:
         m = tk.Menu(self.menubar, tearoff=0)
         m.add_command(label=tr("Pri la programo…"), command=self.about)
         self.menubar.add_cascade(label=tr("Helpo"), menu=m)
+        self._apply_menu_fonts()
 
     # ---------------------------------------------------------------- plugin
     def load_plugins(self):
@@ -819,6 +1110,7 @@ class App:
         m.add_command(label=tr("Reŝargi kromprogramojn"), command=self.reload_plugins)
         m.add_command(label=tr("Malfermi la dosierujon de kromprogramoj"), command=self.open_plugin_dir)
         self._refresh_accelerators()
+        self._apply_menu_fonts()
 
     def open_plugin_dir(self):
         os.makedirs(PLUGIN_DIR, exist_ok=True)
@@ -1001,12 +1293,12 @@ class App:
         d.transient(parent)
         d.resizable(False, False)
         tk.Label(d, text=tr("Funkcio: {nomo}").format(nomo=label),
-                 font=("TkDefaultFont", 10, "bold")).pack(padx=16, pady=(14, 4))
+                 font=("TkDefaultFont", scale_font_size(10), "bold")).pack(padx=sc(16), pady=(sc(14), sc(4)))
         tk.Label(d, text=tr("Premu la novan klavkombinon\n(Ctrl/Alt + klavo, aŭ funkcia klavo F1–F12).\nEsc = nuligi"),
-                 justify="center").pack(padx=16, pady=4)
+                 justify="center").pack(padx=sc(16), pady=sc(4))
         shown = tk.StringVar(value="—")
-        tk.Label(d, textvariable=shown, font=("TkDefaultFont", 14), width=24,
-                 relief="sunken", pady=6).pack(padx=16, pady=8)
+        tk.Label(d, textvariable=shown, font=("TkDefaultFont", scale_font_size(14)), width=24,
+                 relief="sunken", pady=sc(6)).pack(padx=sc(16), pady=sc(8))
         cur = {"seq": None}
 
         def on_key(ev):
@@ -1029,10 +1321,10 @@ class App:
             d.destroy()
 
         bf = tk.Frame(d)
-        bf.pack(pady=(4, 14))
-        tk.Button(bf, text=tr("Bone"), width=10, command=ok).pack(side="left", padx=4)
-        tk.Button(bf, text=tr("Forigi klavon"), width=14, command=clear).pack(side="left", padx=4)
-        tk.Button(bf, text=tr("Nuligi"), width=10, command=d.destroy).pack(side="left", padx=4)
+        bf.pack(pady=(sc(4), sc(14)))
+        tk.Button(bf, text=tr("Bone"), width=10, command=ok).pack(side="left", padx=sc(4))
+        tk.Button(bf, text=tr("Forigi klavon"), width=14, command=clear).pack(side="left", padx=sc(4))
+        tk.Button(bf, text=tr("Nuligi"), width=10, command=d.destroy).pack(side="left", padx=sc(4))
         d.bind("<KeyPress>", on_key)
         d.bind("<Return>", lambda e: ok())
         d.update_idletasks()
@@ -1043,26 +1335,28 @@ class App:
 
     def shortcuts_dialog(self):
         d = tk.Toplevel(self.root)
+        self._sd = d
         d.title(tr("Klavkombinoj"))
-        d.geometry("640x480")
+        d.geometry("%dx%d" % (min(sc(640), int(d.winfo_screenwidth() * 0.95)),
+                              min(sc(480), int(d.winfo_screenheight() * 0.9))))
         d.transient(self.root)
 
         top = tk.Frame(d)
-        top.pack(fill="x", padx=8, pady=(8, 4))
+        top.pack(fill="x", padx=sc(8), pady=(sc(8), sc(4)))
         tk.Label(top, text=tr("Serĉi:")).pack(side="left")
         filt = tk.StringVar()
         ent = tk.Entry(top, textvariable=filt)
-        ent.pack(side="left", fill="x", expand=True, padx=6)
+        ent.pack(side="left", fill="x", expand=True, padx=sc(6))
 
         mid = tk.Frame(d)
-        mid.pack(fill="both", expand=True, padx=8, pady=4)
+        mid.pack(fill="both", expand=True, padx=sc(8), pady=sc(4))
         tree = ttk.Treeview(mid, columns=("grupo", "funkcio", "klavo"), show="headings", selectmode="browse")
         tree.heading("grupo", text=tr("Grupo"))
         tree.heading("funkcio", text=tr("Funkcio"))
         tree.heading("klavo", text=tr("Klavkombino"))
-        tree.column("grupo", width=110, stretch=False)
-        tree.column("funkcio", width=320)
-        tree.column("klavo", width=150, stretch=False)
+        tree.column("grupo", width=sc(110), stretch=False)
+        tree.column("funkcio", width=sc(320))
+        tree.column("klavo", width=sc(150), stretch=False)
         sb = ttk.Scrollbar(mid, orient="vertical", command=tree.yview)
         tree.configure(yscrollcommand=sb.set)
         tree.pack(side="left", fill="both", expand=True)
@@ -1070,7 +1364,7 @@ class App:
 
         note = tk.Label(d, anchor="w", fg="#555",
                         text=tr("Duoble alklaku aŭ premu Enter por ŝanĝi. La elekto estas konservata aŭtomate."))
-        note.pack(fill="x", padx=8)
+        note.pack(fill="x", padx=sc(8))
 
         def groups_order():
             builtin = [tr(x) for x in ("Dosiero", "Redakti", "Etikedoj", "Opcioj")]
@@ -1126,12 +1420,12 @@ class App:
                 refresh()
 
         bf = tk.Frame(d)
-        bf.pack(fill="x", padx=8, pady=8)
-        tk.Button(bf, text=tr("Ŝanĝi…"), command=change).pack(side="left", padx=2)
-        tk.Button(bf, text=tr("Forigi klavon"), command=remove).pack(side="left", padx=2)
-        tk.Button(bf, text=tr("Komenca valoro"), command=default).pack(side="left", padx=2)
-        tk.Button(bf, text=tr("Restarigi ĉiujn"), command=reset_all).pack(side="left", padx=2)
-        tk.Button(bf, text=tr("Fermi"), width=10, command=d.destroy).pack(side="right", padx=2)
+        bf.pack(fill="x", padx=sc(8), pady=sc(8))
+        tk.Button(bf, text=tr("Ŝanĝi…"), command=change).pack(side="left", padx=sc(2))
+        tk.Button(bf, text=tr("Forigi klavon"), command=remove).pack(side="left", padx=sc(2))
+        tk.Button(bf, text=tr("Komenca valoro"), command=default).pack(side="left", padx=sc(2))
+        tk.Button(bf, text=tr("Restarigi ĉiujn"), command=reset_all).pack(side="left", padx=sc(2))
+        tk.Button(bf, text=tr("Fermi"), width=10, command=d.destroy).pack(side="right", padx=sc(2))
 
         tree.bind("<Double-Button-1>", change)
         tree.bind("<Return>", change)
@@ -1631,25 +1925,27 @@ class App:
         if sel and "\n" not in sel:
             self._find_var.set(sel)
 
-        ttk.Label(d, text=tr("Serĉi:")).grid(row=0, column=0, padx=6, pady=4, sticky="e")
+        ttk.Label(d, text=tr("Serĉi:")).grid(row=0, column=0, padx=sc(6), pady=sc(4), sticky="e")
         e1 = ttk.Entry(d, textvariable=self._find_var, width=40)
-        e1.grid(row=0, column=1, columnspan=3, padx=6, pady=4)
-        ttk.Label(d, text=tr("Anstataŭigi per:")).grid(row=1, column=0, padx=6, pady=4, sticky="e")
-        ttk.Entry(d, textvariable=self._repl_var, width=40).grid(row=1, column=1, columnspan=3, padx=6)
+        e1.grid(row=0, column=1, columnspan=3, padx=sc(6), pady=sc(4))
+        ttk.Label(d, text=tr("Anstataŭigi per:")).grid(row=1, column=0, padx=sc(6), pady=sc(4), sticky="e")
+        ttk.Entry(d, textvariable=self._repl_var, width=40).grid(row=1, column=1, columnspan=3, padx=sc(6))
         ttk.Checkbutton(d, text=tr("Distingi majusklojn"), variable=self._case_var).grid(
-            row=2, column=1, columnspan=3, sticky="w", padx=6, pady=(4, 0))
+            row=2, column=1, columnspan=3, sticky="w", padx=sc(6), pady=(sc(4), 0))
         ttk.Checkbutton(d, text=tr("Regulaj esprimoj"), variable=self._regex_var).grid(
-            row=3, column=1, columnspan=3, sticky="w", padx=6)
+            row=3, column=1, columnspan=3, sticky="w", padx=sc(6))
         ttk.Checkbutton(d, text=tr("Specialaj signoj  (\\n  \\t  \\uXXXX)"), variable=self._esc_var).grid(
-            row=4, column=1, columnspan=3, sticky="w", padx=6)
+            row=4, column=1, columnspan=3, sticky="w", padx=sc(6))
         ttk.Checkbutton(d, text=tr("Serĉi en ĉiuj folioj"), variable=self.search_all).grid(
-            row=5, column=1, columnspan=3, sticky="w", padx=6)
-        ttk.Button(d, text=tr("Serĉi antaŭen"), command=lambda: self.find_next(False)).grid(row=6, column=1, pady=(8, 2))
+            row=5, column=1, columnspan=3, sticky="w", padx=sc(6))
+        ttk.Button(d, text=tr("Serĉi antaŭen"), command=lambda: self.find_next(False)).grid(
+            row=6, column=1, pady=(sc(8), sc(2)))
         ttk.Button(d, text=tr("Serĉi malantaŭen"), command=lambda: self.find_next(True)).grid(row=6, column=2)
-        ttk.Button(d, text=tr("Anstataŭigi"), command=self.replace_one).grid(row=6, column=3, padx=2)
+        ttk.Button(d, text=tr("Anstataŭigi"), command=self.replace_one).grid(row=6, column=3, padx=sc(2))
         ttk.Button(d, text=tr("Helpo"), command=lambda: show_info(self.root, tr(SEARCH_HELP), title="Serĉi: helpo")
-                   ).grid(row=7, column=1, pady=(0, 8))
-        ttk.Button(d, text=tr("Anstataŭigi ĉion"), command=self.replace_all).grid(row=7, column=3, padx=2, pady=(0, 8))
+                   ).grid(row=7, column=1, pady=(0, sc(8)))
+        ttk.Button(d, text=tr("Anstataŭigi ĉion"), command=self.replace_all).grid(
+            row=7, column=3, padx=sc(2), pady=(0, sc(8)))
         e1.focus_set()
         e1.bind("<Return>", lambda e: self.find_next(False))
         d.bind("<Escape>", lambda e: d.destroy())
@@ -1849,7 +2145,7 @@ class App:
                 break
             ln = i.split(".")[0]
             if ln != last:
-                g.create_text(w - 6, d[1], anchor="ne", text=ln, font=self.font, fill="#888")
+                g.create_text(w - sc(6), d[1], anchor="ne", text=ln, font=self.font, fill="#888")
                 last = ln
             nxt = text.index(f"{i}+1line")
             if nxt == i:
