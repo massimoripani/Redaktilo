@@ -1,17 +1,22 @@
 # Changelog
 
-Le modifiche più rilevanti di Redaktilo, in ordine dalla più recente.
+The most relevant changes in Redaktilo, in reverse chronological order.
 
-## Non rilasciato
+## Unreleased
 
-### Aggiunto
-- Ricerca e sostituzione con opzione per operare su tutte le schede aperte; la ricerca nella sola scheda corrente resta disponibile.
-- Menu dei file aperti di recente, con elenco persistente e possibilità di svuotarlo.
-- Pacchetti linguistici per l'interfaccia, con lingue disponibili: esperanto, italiano, inglese, tedesco, spagnolo, francese, polacco, russo e ucraino.
-- Caricamento dei pacchetti linguistici aggiuntivi dei plugin, separati per lingua e plugin (per esempio `it.nome_plugin.json`). Le stringhe dei plugin senza traduzione continuano a essere mostrate in esperanto.
+### Added
+- Global UI scaling from the new View → Scale menu, with values from 75% to 300% in 25% steps; changes apply immediately and are saved to settings.
+- Application-drawn, resizable menu bar; menus and dialogs follow the current interface scale.
+- Plugin support for adapting custom pixel sizes to the current scale via `ctx.scale` and `ctx.sc(px)`.
+- Search and replace with an option to operate across all open tabs; searching only the current tab remains available.
+- Recent files menu with a persistent list and the ability to clear it.
+- Interface language packs with supported languages: Esperanto, Italian, English, German, Spanish, French, Polish, Russian, and Ukrainian.
+- Loading of additional plugin language packs, separated by language and plugin (for example `it.plugin_name.json`). Plugin strings without translation continue to be displayed in Esperanto.
 
-### Modificato
-- Le impostazioni utente vengono salvate in `settings.json` nella cartella di configurazione di Redaktilo.
+### Changed
+- User settings are saved to `settings.json` in Redaktilo's configuration directory.
+- Interface scaling now resizes fonts, spacing, and widgets while keeping the user's chosen base font size unchanged; the scale is restored at startup.
+- The Font…, Key shortcuts…, and Language entries were moved under the View menu.
 
-### Documentazione
-- Documentato il formato dei pacchetti linguistici, le regole per i segnaposto e come aggiungere una lingua o traduzioni per un plugin in `lingvoj/LEGUMIN.txt`.
+### Documentation
+- Documented the language-pack format, placeholder rules, and how to add a language or plugin translations in `lingvoj/LEGUMIN.txt`.
