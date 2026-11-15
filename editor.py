@@ -152,13 +152,13 @@ load_language(os.environ.get("REDAKTILO_LINGVO") or load_settings().get("lingvo"
 # Tutta l'interfaccia deriva da un solo fattore globale (UI_SCALE). Le dimensioni "base"
 # (font, pixel) restano sempre quelle al 100%: ogni cambio di scala le ricalcola da zero,
 # quindi gli ingrandimenti non si accumulano.
-SCALE_VALUES = list(range(75, 301, 25))      # 100%, 125%, ... 400%
+SCALE_VALUES = list(range(75, 301, 25))       # 75%, 100%, ... 300%
 DEFAULT_SCALE = 100
 SCALE_SETTING = "interfaca_skalo"             # chiave in settings.json (percentuale intera)
 
 
 def normalize_scale(value):
-    """Valore salvato -> percentuale valida (100..400, passi di 25); altrimenti 100."""
+    """Valore salvato -> percentuale valida (75..300, passi di 25); altrimenti 100."""
     try:
         v = int(round(float(value)))
     except (TypeError, ValueError, OverflowError):
@@ -809,7 +809,7 @@ class App:
             self._redraw_gutter(doc)
 
     def set_scale(self, percent, save=True):
-        """Imposta la scala dell'interfaccia (percentuale 100..400) e la applica subito."""
+        """Imposta la scala dell'interfaccia (percentuale 75..300) e la applica subito."""
         global UI_SCALE
         percent = normalize_scale(percent)
         self.scale_var.set(percent)
@@ -827,6 +827,16 @@ class App:
             except OSError as e:
                 show_error(self.root, tr("Ne eblas konservi:\n{e}").format(e=e))
         self.set_status_message(f"{percent}%")
+
+    def scale_step(self, step):
+        """Passa al valore di scala successivo (+1) o precedente (-1) dell'elenco SCALE_VALUES."""
+        values = SCALE_VALUES
+        cur = self._scale_percent
+        i = values.index(cur) if cur in values else min(range(len(values)), key=lambda k: abs(values[k] - cur))
+        self.set_scale(values[max(0, min(len(values) - 1, i + step))])
+
+    def scale_reset(self):
+        self.set_scale(DEFAULT_SCALE)
 
     def _choose_font_family(self, preferred=None):
         candidates = []
@@ -1026,6 +1036,10 @@ class App:
         for pct in SCALE_VALUES:
             sm.add_radiobutton(label=f"{pct}%", value=pct, variable=self.scale_var,
                                command=lambda p=pct: self.set_scale(p))
+        sm.add_separator()
+        self._add_cmd(sm, "vido.skalo_pli")
+        self._add_cmd(sm, "vido.skalo_malpli")
+        self._add_cmd(sm, "vido.skalo_normala")
         m.add_cascade(label=tr("Skalo"), menu=sm)
         m.add_separator()
         m.add_command(label=tr("Fonto…"), command=self.font_dialog)
@@ -1218,6 +1232,9 @@ class App:
         for label, tag, _acc, seq in TAG_MENU:
             r("etikedo." + tag, "Etikedoj", label, lambda tg=tag: self.wrap_tag(tg), seq)
         r("opcioj.klavoj", "Opcioj", "Klavkombinoj…", self.shortcuts_dialog, None)
+        r("vido.skalo_pli", "Vido", "Pligrandigi la skalon", lambda: self.scale_step(1), "<Control-plus>")
+        r("vido.skalo_malpli", "Vido", "Malpligrandigi la skalon", lambda: self.scale_step(-1), "<Control-minus>")
+        r("vido.skalo_normala", "Vido", "Normala skalo", self.scale_reset, "<Control-0>")
 
     def key_of(self, cid):
         """Sequenza Tk attiva per il comando (scelta dell'utente o predefinita)."""
