@@ -4,7 +4,7 @@ The most relevant changes in Redaktilo, in reverse chronological order.
 
 ## Unreleased
 
-## 2.33 – 2026-11-15
+## 2.34 – 2026-11-15
 
 ### Added
 - Global UI scaling from the new View → Scale menu, with values from 75% to 300% in 25% steps; changes apply immediately, without restarting, and are saved to `settings.json` (key `interfaca_skalo`).
