@@ -19,7 +19,7 @@ The most relevant changes in Redaktilo, in reverse chronological order.
 - Interface scaling now resizes fonts, spacing, and widgets while keeping the user's chosen base font size unchanged; the scale is restored at startup. Saved scale values outside the allowed range go back to 100%.
 - The Font…, Key shortcuts…, and Language entries were moved under the View menu, which now sits between Options and Plugins. Options only keeps the toggles (cx → ĉ while typing, automatic line wrapping, tag highlighting).
 - With the application-drawn menu bar, the Alt key no longer opens the menus, and moving between menus takes one click.
-- - Interface language packs with supported languages: Esperanto, Italian, English, German, Spanish, French, Polish, Russian, and Ukrainian.
+- Language packs with supported languages: Esperanto, Italian, English, German, Spanish, French, Polish, Russian, and Ukrainian.
 - Version bumped to 2.33.
 
 ### Fixed
