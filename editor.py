@@ -152,7 +152,7 @@ load_language(os.environ.get("REDAKTILO_LINGVO") or load_settings().get("lingvo"
 # Tutta l'interfaccia deriva da un solo fattore globale (UI_SCALE). Le dimensioni "base"
 # (font, pixel) restano sempre quelle al 100%: ogni cambio di scala le ricalcola da zero,
 # quindi gli ingrandimenti non si accumulano.
-SCALE_VALUES = list(range(75, 301, 25))      # 100%, 125%, ... 400%
+SCALE_VALUES = list(range(100, 401, 25))      # 100%, 125%, ... 400%
 DEFAULT_SCALE = 100
 SCALE_SETTING = "interfaca_skalo"             # chiave in settings.json (percentuale intera)
 
@@ -1013,20 +1013,20 @@ class App:
             self._add_cmd(m, "etikedo." + tag)
         self.menubar.add_cascade(label=tr("Etikedoj"), menu=m)
 
-        # Visualizza → Scaling (100%..400%, passi di 25; la voce attiva ha l'indicatore)
+        m = tk.Menu(self.menubar, tearoff=0)
+        m.add_checkbutton(label=tr("cx → ĉ dum skribado (Retropaŝo malfaras)"), variable=self.auto_cx,
+                          command=self._update_status)
+        m.add_checkbutton(label=tr("Aŭtomata linifaldo"), variable=self.wrap, command=self._toggle_wrap)
+        m.add_checkbutton(label=tr("Kolorigi etikedojn"), variable=self.highlight_on, command=lambda: [self._schedule_highlight(d) for d in self.docs])
+        self.menubar.add_cascade(label=tr("Opcioj"), menu=m)
+
+        # Vido (Visualizza): Skalo, Fonto, Klavkombinoj, Lingvo — tra "Opcioj" e "Kromprogramoj"
         m = tk.Menu(self.menubar, tearoff=0)
         sm = tk.Menu(m, tearoff=0)
         for pct in SCALE_VALUES:
             sm.add_radiobutton(label=f"{pct}%", value=pct, variable=self.scale_var,
                                command=lambda p=pct: self.set_scale(p))
         m.add_cascade(label=tr("Skalo"), menu=sm)
-        self.menubar.add_cascade(label=tr("Vido"), menu=m)
-
-        m = tk.Menu(self.menubar, tearoff=0)
-        m.add_checkbutton(label=tr("cx → ĉ dum skribado (Retropaŝo malfaras)"), variable=self.auto_cx,
-                          command=self._update_status)
-        m.add_checkbutton(label=tr("Aŭtomata linifaldo"), variable=self.wrap, command=self._toggle_wrap)
-        m.add_checkbutton(label=tr("Kolorigi etikedojn"), variable=self.highlight_on, command=lambda: [self._schedule_highlight(d) for d in self.docs])
         m.add_separator()
         m.add_command(label=tr("Fonto…"), command=self.font_dialog)
         self._add_cmd(m, "opcioj.klavoj")
@@ -1036,7 +1036,7 @@ class App:
             lm.add_radiobutton(label=f"{nomo}  ({code})", value=code, variable=self._lang_var,
                                command=lambda c=code: self.set_language(c))
         m.add_cascade(label=tr("Lingvo"), menu=lm)
-        self.menubar.add_cascade(label=tr("Opcioj"), menu=m)
+        self.menubar.add_cascade(label=tr("Vido"), menu=m)
 
         self.plugin_menu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label=tr("Kromprogramoj"), menu=self.plugin_menu)
