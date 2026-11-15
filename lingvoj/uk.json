@@ -134,6 +134,19 @@
   "Skalo": "Масштаб",
   "Pligrandigi la skalon": "Збільшити масштаб",
   "Malpligrandigi la skalon": "Зменшити масштаб",
-  "Normala skalo": "Звичайний масштаб"
+  "Normala skalo": "Звичайний масштаб",
+  "Fonto": "Шрифт",
+  "Fonto:": "Шрифт:",
+  "Grando:": "Розмір:",
+  "Nevalida grando de tiparo.": "Недійсний розмір шрифту.",
+  "Lastatempe malfermitaj": "Нещодавно відкриті",
+  "Fonto…": "Шрифт…",
+  "(neniu)": "(немає)",
+  "Forigi liston": "Очистити список",
+  "Serĉi en ĉiuj folioj": "Шукати в усіх вкладках",
+  "Konvertiloj": "Конвертери",
+  "Kontroliloj": "Перевірки",
+  "Literumilo": "Перевірка правопису",
+  "Aliaj iloj": "Інші інструменти"
  }
 }

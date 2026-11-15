@@ -134,6 +134,19 @@
   "Skalo": "Scaling",
   "Pligrandigi la skalon": "Increase scale",
   "Malpligrandigi la skalon": "Decrease scale",
-  "Normala skalo": "Normal scale"
+  "Normala skalo": "Normal scale",
+  "Fonto": "Font",
+  "Fonto:": "Font:",
+  "Grando:": "Size:",
+  "Nevalida grando de tiparo.": "Invalid font size.",
+  "Lastatempe malfermitaj": "Recently opened",
+  "Fonto…": "Font…",
+  "(neniu)": "(none)",
+  "Forigi liston": "Clear list",
+  "Serĉi en ĉiuj folioj": "Search in all tabs",
+  "Konvertiloj": "Converters",
+  "Kontroliloj": "Checkers",
+  "Literumilo": "Spell checker",
+  "Aliaj iloj": "Other tools"
  }
 }

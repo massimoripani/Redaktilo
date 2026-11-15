@@ -134,6 +134,19 @@
   "Skalo": "Échelle",
   "Pligrandigi la skalon": "Augmenter l'échelle",
   "Malpligrandigi la skalon": "Réduire l'échelle",
-  "Normala skalo": "Échelle normale"
+  "Normala skalo": "Échelle normale",
+  "Fonto": "Police",
+  "Fonto:": "Police :",
+  "Grando:": "Taille :",
+  "Nevalida grando de tiparo.": "Taille de police invalide.",
+  "Lastatempe malfermitaj": "Ouverts récemment",
+  "Fonto…": "Police…",
+  "(neniu)": "(aucun)",
+  "Forigi liston": "Effacer la liste",
+  "Serĉi en ĉiuj folioj": "Rechercher dans tous les onglets",
+  "Konvertiloj": "Convertisseurs",
+  "Kontroliloj": "Vérificateurs",
+  "Literumilo": "Correcteur orthographique",
+  "Aliaj iloj": "Autres outils"
  }
 }
