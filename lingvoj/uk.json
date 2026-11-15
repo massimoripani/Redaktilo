@@ -131,6 +131,9 @@
   "Sekva dokumento": "Наступний документ",
   "Antaŭa dokumento": "Попередній документ",
   "Vido": "Вигляд",
-  "Skalo": "Масштаб"
+  "Skalo": "Масштаб",
+  "Pligrandigi la skalon": "Збільшити масштаб",
+  "Malpligrandigi la skalon": "Зменшити масштаб",
+  "Normala skalo": "Звичайний масштаб"
  }
 }

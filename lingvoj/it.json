@@ -131,6 +131,9 @@
   "Sekva dokumento": "Documento successivo",
   "Antaŭa dokumento": "Documento precedente",
   "Vido": "Visualizza",
-  "Skalo": "Scaling"
+  "Skalo": "Scaling",
+  "Pligrandigi la skalon": "Aumenta scaling",
+  "Malpligrandigi la skalon": "Riduci scaling",
+  "Normala skalo": "Scaling normale"
  }
 }
