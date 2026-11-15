@@ -1,4 +1,3 @@
-
 {
   "_meta": {
     "kodo": "ru",
@@ -130,6 +129,8 @@
     "SPECIALAJ SIGNOJ  (en «Serĉi» kaj «Anstataŭigi per»)\n  \\n  novlinio              \\t  tabo\n  \\r\\n  valoras kiel novlinio (la redaktilo uzas internan \\n)\n  \\uXXXX  signo laŭ Unicode (ekz. \\u02BF = ʿ)     \\xHH  signo (2 deksesumaj ciferoj)\n  \\\\  la oblikva streko mem\n\nREGULAJ ESPRIMOJ  (se la skatolo estas markita)\n  .  ajna signo (ne novlinio)    ^  linikomenco    $  linifino    \\b  vortlimo\n  \\d  cifero    \\w  litero/cifero    \\s  spaco    [abc]  unu el    [^abc]  neniu el\n  *  0 aŭ pli    +  1 aŭ pli    ?  0 aŭ 1    {2,4}  2 ĝis 4    a|b  a aŭ b\n  (…)  grupo; en «Anstataŭigi per»:  \\1  \\2  aŭ  \\g<nomo>\n  [\\s\\S]  ĉiu signo, ankaŭ novlinio       (?s)  ĉe la komenco: la punkto trovas ankaŭ novliniojn\n\nEKZEMPLOJ\n  Forigi finajn spacojn:      serĉi  [ \\t]+$      anstataŭigi per  (nenio)\n  Unu alineo → unu linio:     serĉi  \\n\\n        anstataŭigi per  \\n\n  Meti <p> ĉirkaŭ ĉiu linio:  serĉi  ^(.+)$     anstataŭigi per  <p>\\1</p>\n": "СПЕЦИАЛЬНЫЕ СИМВОЛЫ  (в полях «Найти» и «Заменить на»)\n  \\n  новая строка              \\t  табуляция\n  \\r\\n  считается символом новой строки (редактор использует внутренний \\n)\n  \\uXXXX  символ Unicode (например, \\u02BF = ʿ)     \\xHH  символ (2 шестнадцатеричные цифры)\n  \\\\  сам символ обратной косой черты\n\nРЕГУЛЯРНЫЕ ВЫРАЖЕНИЯ  (если установлен флажок)\n  .  любой символ (кроме новой строки)    ^  начало строки    $  конец строки    \\b  граница слова\n  \\d  цифра    \\w  буква или цифра    \\s  пробельный символ    [abc]  один из символов    [^abc]  ни один из символов\n  *  0 или более    +  1 или более    ?  0 или 1    {2,4}  от 2 до 4    a|b  a или b\n  (…)  группа; в поле «Заменить на»:  \\1  \\2  или  \\g<name>\n  [\\s\\S]  любой символ, включая новую строку       (?s)  в начале: точка также находит символы новой строки\n\nПРИМЕРЫ\n  Удалить пробелы в конце строк:      найти  [ \\t]+$      заменить на  (ничего)\n  Один абзац → одна строка:           найти  \\n\\n        заменить на  \\n\n  Добавить <p> вокруг каждой строки:  найти  ^(.+)$     заменить на  <p>\\1</p>\n",
     "Serĉi kaj anstataŭigi…": "Найти и заменить…",
     "Sekva dokumento": "Следующий документ",
-    "Antaŭa dokumento": "Предыдущий документ"
+    "Antaŭa dokumento": "Предыдущий документ",
+    "Vido": "Вид",
+    "Skalo": "Масштаб"
   }
 }
