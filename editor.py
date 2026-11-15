@@ -152,7 +152,7 @@ load_language(os.environ.get("REDAKTILO_LINGVO") or load_settings().get("lingvo"
 # Tutta l'interfaccia deriva da un solo fattore globale (UI_SCALE). Le dimensioni "base"
 # (font, pixel) restano sempre quelle al 100%: ogni cambio di scala le ricalcola da zero,
 # quindi gli ingrandimenti non si accumulano.
-SCALE_VALUES = list(range(100, 401, 25))      # 100%, 125%, ... 400%
+SCALE_VALUES = list(range(75, 301, 25))      # 100%, 125%, ... 400%
 DEFAULT_SCALE = 100
 SCALE_SETTING = "interfaca_skalo"             # chiave in settings.json (percentuale intera)
 
