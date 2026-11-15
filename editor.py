@@ -78,13 +78,6 @@ DEFAULT_LANG = "eo"
 _TR = {}
 CURRENT_LANG = DEFAULT_LANG
 
-# Tradukoj de ĉenoj de la menuo "Vido → Skalo" kiuj povas manki en lingvoj/*.json
-# (se la dosiero de la lingvo havas tiujn ĉenojn, ĝi gajnas).
-_FALLBACK_TR = {
-    "it": {"Vido": "Visualizza", "Skalo": "Scaling"},
-    "en": {"Vido": "View", "Skalo": "Scaling"},
-}
-
 
 def tr(s):
     """Traduko de ĉeno (se mankas, la originala Esperanta teksto)."""
@@ -127,8 +120,6 @@ def load_language(code):
                 pass
     _TR = {k: v for k, v in table.items() if v}
     CURRENT_LANG = code if table else DEFAULT_LANG
-    for k, v in _FALLBACK_TR.get(CURRENT_LANG, {}).items():
-        _TR.setdefault(k, v)
 
 
 def load_settings():
@@ -394,14 +385,14 @@ REGULAJ ESPRIMOJ  (se la skatolo estas markita)
   .  ajna signo (ne novlinio)    ^  linikomenco    $  linifino    \\b  vortlimo
   \\d  cifero    \\w  litero/cifero    \\s  spaco    [abc]  unu el    [^abc]  neniu el
   *  0 aŭ pli    +  1 aŭ pli    ?  0 aŭ 1    {2,4}  2 ĝis 4    a|b  a aŭ b
-  (…)  gruppo; en «Anstataŭigi per»:  \\1  \\2  aŭ  \\g<nomo>
+  (…)  grupo; en «Anstataŭigi per»:  \\1  \\2  aŭ  \\g<nomo>
   [\\s\\S]  ĉiu signo, ankaŭ novlinio       (?s)  ĉe la komenco: la punkto trovas ankaŭ novliniojn
 
 EKZEMPLOJ
   Forigi finajn spacojn:      serĉi  [ \\t]+$      anstataŭigi per  (nenio)
   Unu alineo → unu linio:     serĉi  \\n\\n        anstataŭigi per  \\n
   Meti <p> ĉirkaŭ ĉiu linio:  serĉi  ^(.+)$     anstataŭigi per  <p>\\1</p>
-  """
+"""
 
 # =====================================================================
 # Contesto passato ai plugin
