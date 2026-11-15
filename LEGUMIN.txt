@@ -17,7 +17,7 @@ FUNKCIOJ
   Malfari/refari, kolorigi etikedojn kaj komentojn, kaj elekti tiparon.
   Aŭtomate konverti cx al ĉ dum skribado (Retropaŝo tuj poste reakiras cx).
   Ŝanĝi la interfacan skalon de 75% ĝis 300%; la elekto estas konservata.
-  Agordi klavkombinojn per Vido → Klavkombinoj.
+  Agordi klavkomandojn per Vido → Klavkomandoj.
 
 KROMPROGRAMOJ
   Konvertiloj
@@ -45,14 +45,14 @@ LITERUMILO
   La literumilo uzas la Esperanto-vortaron Hunspell de LibreOffice kaj spylls.
   Propraj radikoj estas konservataj en vortaroj/propra.txt.
 
-KLAVOKOMBINOJ
+KLAVOKomandOJ
   Ctrl+N nova · Ctrl+O malfermi · Ctrl+S konservi · Ctrl+Shift+S konservi kiel
   Ctrl+F serĉi · Ctrl+G iri al linio · Ctrl+Z malfari · Ctrl+Y refari
   Ctrl+B <d> · Ctrl+I <k> · Ctrl+Shift+Q <c> · Ctrl+Shift+M <mm>
   Ctrl+Shift+P <p> · Ctrl+Shift+C komento
   Ctrl+plus / Ctrl+minus ŝanĝi skalon · Ctrl+0 normala skalo
   F7 literumilo
-  La kombinojn eblas ŝanĝi en Vido → Klavkombinoj.
+  La komandojn eblas ŝanĝi en Vido → Klavkomandoj.
 
 KONSTRUI LA MEMSTARAN PROGRAMON
   Windows:   konstrui_exe.bat
