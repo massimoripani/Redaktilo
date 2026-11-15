@@ -28,7 +28,7 @@ import monato_common as mc  # noqa: E402
 
 
 APP_NAME = "Redaktilo"
-VERSION = "2.33"
+VERSION = "2.34"
 CATEGORY_ORDER = ["Konvertiloj", "Kontroliloj", "Literumilo", "Aliaj iloj"]
 DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
 DEFAULT_FONT_SIZE = 12
