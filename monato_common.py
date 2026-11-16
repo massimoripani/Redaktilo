@@ -122,7 +122,7 @@ def validate_comments(text):
 
 # ------------------------------------------------------- parole con maiuscola
 _KW_RE = re.compile(
-    r"\b[A-Z][a-zA-ZĈ-ŭ'\-]*(?:[^\S\n]*[A-Z][a-zA-ZĈ-ŭ'\-]*)*\b")
+    r"\b[A-Z][a-zA-ZĈ-ŭ'\-]*(?:[^\S\n]+[A-Z][a-zA-ZĈ-ŭ'\-]*)*\b")
 
 _SKIP_BLOCKS = re.compile(r"<(sv|inf|kod|n-ro|aut|land|rub)>.*?</\1>", re.DOTALL)
 
