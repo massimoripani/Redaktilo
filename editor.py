@@ -1060,7 +1060,7 @@ class App:
         self._menu_entries = {k: v for k, v in self._menu_entries.items() if not k.startswith("plugin:")}
         try:
             importlib.reload(mc)
-        except Exception:
+        except Exception:  # noqa: S110  # nosec B110
             pass
         if not os.path.isdir(PLUGIN_DIR):
             return
@@ -1122,12 +1122,12 @@ class App:
         os.makedirs(PLUGIN_DIR, exist_ok=True)
         try:
             if sys.platform.startswith("win"):
-                os.startfile(PLUGIN_DIR)  # nosec B606
+                os.startfile(PLUGIN_DIR)  # noqa: S606  # nosec B606
             elif sys.platform == "darwin":
                 # lista di argomenti, nessuna shell: il percorso non può iniettare comandi
-                subprocess.Popen(["open", PLUGIN_DIR])  # nosec B603 B607
+                subprocess.Popen(["open", PLUGIN_DIR])  # noqa: S603, S607  # nosec B603 B607
             else:
-                subprocess.Popen(["xdg-open", PLUGIN_DIR],  # nosec B603 B607
+                subprocess.Popen(["xdg-open", PLUGIN_DIR],  # noqa: S603, S607  # nosec B603 B607
                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         except Exception as e:
             show_error(self.root, tr("Ne eblas malfermi la dosierujon:\n{dir}\n\n{e}").format(dir=PLUGIN_DIR, e=e))
