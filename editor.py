@@ -17,6 +17,7 @@ import traceback
 import json
 import tkinter as tk
 import tkinter.font as tkfont
+import webbrowser
 from tkinter import filedialog, ttk
 
 FROZEN = getattr(sys, "frozen", False)          # True quando gira come .exe
@@ -33,6 +34,7 @@ VERSION = "2.35"
 CATEGORY_ORDER = ["Konvertiloj", "Kontroliloj", "Literumilo", "Aliaj iloj"]
 DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
 DEFAULT_FONT_SIZE = 12
+CONVENTIONS_URL = "https://www.monato.be/red/tek_konv.php"
 
 X_MAP = {"c": "ĉ", "g": "ĝ", "h": "ĥ", "j": "ĵ", "s": "ŝ", "u": "ŭ",
          "C": "Ĉ", "G": "Ĝ", "H": "Ĥ", "J": "Ĵ", "S": "Ŝ", "U": "Ŭ"}
@@ -1052,6 +1054,7 @@ class App:
         self.menubar.add_cascade(label=tr("Kromprogramoj"), menu=self.plugin_menu)
 
         m = tk.Menu(self.menubar, tearoff=0)
+        m.add_command(label=tr("Teknikaj konvencioj de Monato…"), command=self.open_conventions)
         m.add_command(label=tr("Pri la programo…"), command=self.about)
         self.menubar.add_cascade(label=tr("Helpo"), menu=m)
         self._apply_menu_fonts()
@@ -1146,7 +1149,10 @@ class App:
                      "Lingvaj pakaĵoj: {lingvoj}\n\n"
                      "Licenco: vidu LICENCO.txt").format(app=APP_NAME, versio=VERSION, dir=PLUGIN_DIR,
                                                          lingvoj=LANG_DIR), title="Pri la programo")
-
+    def open_conventions(self):
+        """Malfermas la teknikajn konvenciojn de Monato en la retumilo."""
+        if not webbrowser.open(CONVENTIONS_URL):
+            show_error(self.root, tr("Ne eblas malfermi la retumilon.\n\n{url}").format(url=CONVENTIONS_URL))    
     def set_language(self, code):
         data = load_settings()
         data["lingvo"] = code
