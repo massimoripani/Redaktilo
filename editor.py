@@ -29,7 +29,7 @@ import monato_common as mc  # noqa: E402
 
 
 APP_NAME = "Redaktilo"
-VERSION = "2.34"
+VERSION = "2.35"
 CATEGORY_ORDER = ["Konvertiloj", "Kontroliloj", "Literumilo", "Aliaj iloj"]
 DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
 DEFAULT_FONT_SIZE = 12
@@ -39,16 +39,16 @@ X_MAP = {"c": "ĉ", "g": "ĝ", "h": "ĥ", "j": "ĵ", "s": "ŝ", "u": "ŭ",
 
 # (voce di menu, tag, scorciatoia mostrata, sequenza Tk o None)
 TAG_MENU = [
+    ("Alineo  <p>", "p", "Ctrl+Shift+P", "<Control-P>"),
     ("Dika  <d>", "d", "Ctrl+B", "<Control-b>"),
     ("Kursiva  <k>", "k", "Ctrl+I", "<Control-i>"),
     ("Citiloj  <c>", "c", "Ctrl+Shift+Q", "<Control-Q>"),
-    ("Malgrandaj majuskloj  <mm>", "mm", "Ctrl+Shift+M", "<Control-M>"),
+    ("Komento  <!-- -->", "!--", "Ctrl+Shift+C", "<Control-C>"),
     ("Ruĝa  <r>", "r", None, None),
     ("Malaltigo  <sub>", "sub", None, None),
     ("Altigo  <sup>", "sup", None, None),
     ("Retadreso  <ret>", "ret", None, None),
-    ("Alineo  <p>", "p", "Ctrl+Shift+P", "<Control-P>"),
-    ("Komento  <!-- -->", "!--", "Ctrl+Shift+C", "<Control-C>"),
+    ("Malgrandaj majuskloj  <mm>", "mm", "Ctrl+Shift+M", "<Control-M>"),
 ]
 
 
