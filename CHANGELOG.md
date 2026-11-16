@@ -4,6 +4,12 @@ The most relevant changes in Redaktilo, in reverse chronological order.
 
 ## Unreleased
 
+## 2.35 - 2026-11-16
+
+- Security: replaced shell calls with subprocess in the plugin folder opener; XML parsing hardened with defusedxml; added the Security Audit workflow
+
+## Released
+
 ## 2.34 – 2026-11-15
 
 ### Added
