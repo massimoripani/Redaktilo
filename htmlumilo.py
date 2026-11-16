@@ -1,7 +1,7 @@
 import re
 import os
 import html
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET  # parser XML sicuro (protegge da XML bomb / entità esterne)
 from html import escape
 
 # Se True, i tag di servizio (inf, n-ro, kod, loko, lig, mend, retfoto)
