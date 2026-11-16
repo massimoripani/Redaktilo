@@ -39,15 +39,19 @@ X_MAP = {"c": "ĉ", "g": "ĝ", "h": "ĥ", "j": "ĵ", "s": "ŝ", "u": "ŭ",
 
 # (voce di menu, tag, scorciatoia mostrata, sequenza Tk o None)
 TAG_MENU = [
+    ("Artikolo  <art>", "art", None, None),
     ("Alineo  <p>", "p", "Ctrl+Shift+P", "<Control-P>"),
     ("Dika  <d>", "d", "Ctrl+B", "<Control-b>"),
     ("Kursiva  <k>", "k", "Ctrl+I", "<Control-i>"),
     ("Citiloj  <c>", "c", "Ctrl+Shift+Q", "<Control-Q>"),
     ("Komento  <!-- -->", "!--", "Ctrl+Shift+C", "<Control-C>"),
+    ("Intertitolo  <it>", "it", None, None),
+    ("Haltostreko  <hs/>", "hs", None, None),
     ("Ruĝa  <r>", "r", None, None),
     ("Malaltigo  <sub>", "sub", None, None),
     ("Altigo  <sup>", "sup", None, None),
     ("Retadreso  <ret>", "ret", None, None),
+    ("Aŭtoro  <aut>", "aut", None, None),
     ("Malgrandaj majuskloj  <mm>", "mm", "Ctrl+Shift+M", "<Control-M>"),
 ]
 
