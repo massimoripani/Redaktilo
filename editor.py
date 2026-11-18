@@ -48,8 +48,6 @@ TAG_MENU = [
     ("Citiloj  <c>", "c", "Ctrl+Shift+Q", "<Control-Q>"),
     ("Komento  <!-- -->", "!--", "Ctrl+Shift+C", "<Control-C>"),
     ("Intertitolo  <it>", "it", None, None),
-    ("Haltostreko  <hs/>", "hs", None, None),
-    ("Ruĝa  <r>", "r", None, None),
     ("Malaltigo  <sub>", "sub", None, None),
     ("Altigo  <sup>", "sup", None, None),
     ("Retadreso  <ret>", "ret", None, None),
