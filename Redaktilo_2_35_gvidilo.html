@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="eo"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Redaktilo 2.35: la gvidilo</title>
+<style>
+:root{--bg:#fff;--fg:#1f2328;--mut:#5b6470;--line:#d8dde3;--acc:#1f5fbf;--code:#f2f4f7;--side:#f7f8fa}
+@media(prefers-color-scheme:dark){:root{--bg:#15181c;--fg:#e4e7eb;--mut:#9aa4b0;--line:#2d333b;--acc:#7db1ff;--code:#222831;--side:#1b1f24}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.65 Georgia,"Times New Roman",serif}
+.wrap{display:flex;max-width:1180px;margin:0 auto}
+nav{position:sticky;top:0;align-self:flex-start;height:100vh;overflow:auto;width:260px;flex:none;padding:24px 16px;background:var(--side);border-right:1px solid var(--line);font:14px/1.4 system-ui,sans-serif}
+nav b{display:block;margin-bottom:12px;font-size:15px}
+nav a{display:block;color:var(--fg);text-decoration:none;padding:4px 8px;border-radius:4px}
+nav a:hover{background:var(--line)}
+nav a.part{margin-top:12px;font-weight:700;color:var(--acc);text-transform:uppercase;font-size:12px;letter-spacing:.04em}
+nav a.sec{padding-left:14px}
+main{padding:32px 40px 80px;min-width:0;max-width:820px}
+h1{font:700 1.5rem/1.3 system-ui,sans-serif;margin:2.4em 0 .6em;padding-top:.6em;border-top:3px solid var(--acc);color:var(--acc)}
+h1.title{font-size:2.1rem;margin:0 0 .4em;border:0;padding:0;color:var(--fg)}
+h2{font:700 1.4rem/1.3 system-ui,sans-serif;margin:2em 0 .5em;padding-bottom:.2em;border-bottom:1px solid var(--line)}
+h3{font:700 1.12rem/1.3 system-ui,sans-serif;margin:1.6em 0 .4em}
+p,li{margin:.7em 0}
+a{color:var(--acc)}
+code{background:var(--code);padding:.1em .35em;border-radius:4px;font:.88em Consolas,Menlo,monospace}
+pre{background:var(--code);padding:14px 16px;border-radius:6px;overflow:auto}pre code{padding:0;background:none}
+table{border-collapse:collapse;width:100%;margin:1.2em 0;font:14.5px/1.45 system-ui,sans-serif;display:block;overflow-x:auto}
+th,td{border:1px solid var(--line);padding:6px 10px;text-align:left;vertical-align:top}
+th{background:var(--side)}
+.lead{color:var(--mut);font-size:1.05rem}
+@media(max-width:860px){.wrap{display:block}nav{position:static;height:auto;width:auto;border:0;border-bottom:1px solid var(--line)}main{padding:20px 16px 60px}}
+@media print{nav{display:none}main{max-width:none;padding:0}h1,h2{break-after:avoid}table,pre{break-inside:avoid}}
+</style></head><body><div class="wrap">
+<nav><b>Redaktilo 2.35: la gvidilo</b>
+<a class="sec" href="#kio-estas-redaktilo">Kio estas Redaktilo</a>
+<a class="sec" href="#rapida-komenco">Rapida komenco</a>
+<a class="part" href="#unua-parto-la-programo">Unua parto: la programo</a>
+<a class="sec" href="#lanco">Lanĉo</a>
+<a class="sec" href="#la-cefa-fenestro">La ĉefa fenestro</a>
+<a class="sec" href="#laboro-kun-dosieroj">Laboro kun dosieroj</a>
+<a class="sec" href="#redaktado-kaj-sercado">Redaktado kaj serĉado</a>
+<a class="sec" href="#etikedoj-kaj-komentoj">Etikedoj kaj komentoj</a>
+<a class="sec" href="#agordoj">Agordoj</a>
+<a class="part" href="#dua-parto-la-kromprogramoj">Dua parto: la kromprogramoj</a>
+<a class="sec" href="#kromprogramoj-generale">Kromprogramoj ĝenerale</a>
+<a class="sec" href="#konvertiloj">Konvertiloj</a>
+<a class="sec" href="#kontroliloj">Kontroliloj</a>
+<a class="sec" href="#literumilo-spell-check-py">Literumilo (spell_check.py)</a>
+<a class="sec" href="#aliaj-iloj">Aliaj iloj</a>
+<a class="sec" href="#propraj-kromprogramoj">Propraj kromprogramoj</a>
+</nav>
+<main><h1 class="title">Redaktilo 2.35: la gvidilo</h1>
+<p class="lead">Redaktilo 2.35 estas UTF-8-teksta redaktilo por Esperanto, farita por verki kaj kontroli artikolojn laŭ la teknikaj konvencioj de la gazeto Monato; ĉi tiu gvidilo priskribas la programon kaj ĉiujn ĝiajn kromprogramojn.</p>
+<h2 id="kio-estas-redaktilo">Kio estas Redaktilo</h2>
+<p>Redaktilo estas simpla, sed specialigita redaktilo, farita per Python kaj tkinter. Ĝi estas konstruita ĉirkaŭ du ideoj. La unua estas bona ĉiutaga redaktado de Esperanto-teksto: pluraj dokumentoj en apartaj langetoj, serĉo kaj anstataŭigo (laŭvole per regulaj esprimoj, ankaŭ en ĉiuj langetoj), malfarado kaj refarado, aŭtomata konverto de cx, gx, hx, jx, sx, ux al ĉ, ĝ, ĥ, ĵ, ŝ, ŭ dum skribado, kaj kolorigo de etikedoj kaj komentoj. La dua ideo estas la kromprogramoj: malgrandaj Python-dosieroj, kiuj faras laborojn specifajn por Monato, ekzemple krei artikolan skeleton, kontroli la etikedojn, serĉi mankantajn komojn kaj literumi.</p>
+<p>La interfaco ekzistas en naŭ lingvoj, la skalo ŝanĝeblas de 75 % ĝis 300 %, la tiparo estas elektebla kaj la klavkomandoj estas ŝanĝeblaj. Ĉio ĉi estas priskribita en la sekvaj sekcioj; la sekcioj de «Lanĉo» ĝis «Agordoj» traktas la ĉefan programon, la aliaj la kromprogramojn.</p>
+<h2 id="rapida-komenco">Rapida komenco</h2>
+<p>Antaŭ la detaloj, jen la tipa vojo de kruda teksto ĝis preta artikolo; ĉiu paŝo havas sian sekcion en ĉi tiu gvidilo.</p>
+<ol>
+<li><strong>Malfermu la tekston</strong> per Dosiero → Malfermi… (aŭ algluu ĝin en novan dokumenton). Se ĝi venas el PDF aŭ retpoŝto kun rompitaj linioj, uzu unue la «Rekonstruilo de alineoj».</li>
+<li><strong>Konvertu la signojn</strong>: cx, gx… al ĉ, ĝ… per la konvertilo «cx → ĉ», kaj HTML-kodojn (<code>&amp;Uuml;</code>…) per «HTML-kodoj → UTF8».</li>
+<li><strong>Kreu la skeleton</strong> per «Teksto → XML-dokumento» (artikolo) aŭ «Teksto → intervjuo»; poste plenigu <code>&lt;tt&gt;</code>, <code>&lt;t&gt;</code>, la rubrikon kaj la aliajn kampojn.</li>
+<li><strong>Redaktu</strong>, uzante la menuon Etikedoj kaj la klavkomandojn por dika, kursiva, citiloj ktp.</li>
+<li><strong>Kontrolu</strong>: literumilo (F7), mankantaj komoj, misdividoj, kaj «Etikedoj kaj komentoj».</li>
+<li><strong>Rigardu la antaŭrigardon</strong> en la retumilo kaj kalkulu la longon per «Kvanto de tajperoj».</li>
+<li><strong>Konservu</strong> per Ctrl+S; la dosiero estas ĉiam UTF-8 sen BOM.</li>
+</ol>
+<p>La unua parto de la gvidilo priskribas la ĉefan programon; la dua parto priskribas la kromprogramojn, kiuj efektivigas la paŝojn 1–3, 5 kaj 6.</p>
+<h1 id="unua-parto-la-programo">Unua parto: la programo</h1>
+<h2 id="lanco">Lanĉo</h2>
+<p>La distribuita versio de Redaktilo estas memstara: oni ne bezonas instali Python, tkinter nek aliajn pakaĵojn, ĉar ĉio necesa troviĝas en la dosierujo <code>_internal</code> apud <code>Redaktilo.exe</code>. Sufiĉas konservi la tutan dosierujon Redaktilo kune (kun <code>Redaktilo.exe</code>, <code>_internal</code>, <code>kromprogramoj</code>, <code>lingvoj</code> kaj <code>vortaroj</code>) kaj duoble alklaki <code>Redaktilo.exe</code>.</p>
+<p>Programistoj povas lanĉi la programon ankaŭ el la fontkodo per <code>python3 editor.py [dosiero]</code>. Tiam necesas Python 3 kun tkinter kaj la pakaĵoj spylls (literumilo kaj kontrolo de vortdividoj) kaj defusedxml (sekura XML-legado), instaleblaj per <code>python -m pip install -r requirements.txt</code>. La memstaran version oni konstruas per <code>konstrui_exe.bat</code> (Windows) aŭ <code>sh konstrui_exe.sh</code> (Linux kaj macOS).</p>
+<p>Post la nomo de la programo oni povas doni unu aŭ plurajn dosierojn; ĉiu malfermiĝas en propra langeto. La opcio <code>--proba</code> ŝargas la kromprogramojn, presas la liston de iliaj funkcioj kaj tuj fermas la programon; ĝi utilas por provi, ĉu la kromprogramoj ŝargiĝas senerare.</p>
+<p>Apud la programo troviĝas tri dosierujoj: <code>kromprogramoj</code> (la kromprogramoj), <code>lingvoj</code> (la lingvaj pakaĵoj) kaj <code>vortaroj</code> (la vortaroj de la literumilo kaj de la kontroliloj). La personaj agordoj de la uzanto, <code>settings.json</code> kaj <code>klavkombinoj.json</code>, estas konservataj aparte, en la dosierujo Redaktilo de la agorda loko de la sistemo: <code>%APPDATA%</code> en Windows, <code>~/Library/Application Support</code> en macOS kaj <code>~/.config</code> (aŭ <code>$XDG_CONFIG_HOME</code>) en Linux. Tiel la agordoj funkcias, eĉ se la programo troviĝas en dosierujo, kie oni ne rajtas skribi.</p>
+<h2 id="la-cefa-fenestro">La ĉefa fenestro</h2>
+<p>La fenestro de Redaktilo konsistas el kvar partoj, de supre malsupren. Plej supre troviĝas la menubreto kun la menuoj Dosiero, Redakti, Etikedoj, Opcioj, Vido, Kromprogramoj kaj Helpo. Redaktilo mem desegnas ĝin, tial ĝi sekvas la interfacan skalon; la klavo Alt ne malfermas la menuojn, oni devas alklaki ilin.</p>
+<p>Sub la menubreto estas la langetoj: ĉiu malfermita dokumento havas propran langeton kun sia nomo (nova dokumento nomiĝas «sennoma», «sennoma 2» ktp.). Stelo (*) antaŭ la nomo montras nekonservitajn ŝanĝojn. Dekstra alklako sur langeto ofertas «Konservi» kaj «Fermi la dokumenton», kaj meza alklako (ne en macOS) tuj fermas la langeton.</p>
+<p>Plej granda estas la tekstokampo, kun linionumeroj maldekstre; ĉiu dokumento havas sian apartan historion de malfarado kaj refarado. Malsupre estas la statobreto, kiu montras la linion kaj kolumnon de la kursoro, la nombron de signoj, la kodigon de la dosiero (UTF-8 aŭ la originan, se ĝi estis konvertita) kaj la staton de la aŭtomata konverto cx→ĉ. Post ago, ekzemple serĉo aŭ ŝanĝo de skalo, mallonga mesaĝo aperas ĉe la fino de la statobreto. La titolo de la fenestro estas «nomo — Redaktilo», kun * kiam estas nekonservitaj ŝanĝoj.</p>
+<h3 id="panelo-de-rezultoj">Panelo de rezultoj</h3>
+<p>Kiam kromprogramo raportas rezultojn, ekzemple kontrolilo, aperas panelo super la tekstokampo. Ĝi apartenas al la dokumento, en kiu la rezultoj estis produktitaj. Duobla alklako aŭ Enter sur ero saltas al la responda linio, kiun la programo markas flave. Dekstra alklako ofertas «Kopii elektitajn», «Kopii ĉion», «Elekti ĉion» kaj «Konservi…»; la sama kopiado kaj konservado eblas per la butonoj «Kopii ĉion» kaj «Konservi…». Konservi oni povas kiel .txt (unu ero po linio) aŭ kiel .csv por Excel (disigilo ; kaj kolumnoj «linio» kaj «mesaĝo»). La butono ✕ fermas la panelon.</p>
+<h2 id="laboro-kun-dosieroj">Laboro kun dosieroj</h2>
+<p>La komandoj pri dosieroj troviĝas en la menuo Dosiero kaj havas jenajn klavkomandojn.</p>
+<table>
+<thead>
+<tr>
+<th>Komando</th>
+<th>Klavkomando</th>
+<th>Funkcio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nova</td>
+<td>Ctrl+N</td>
+<td>Malfermas novan malplenan dokumenton en nova langeto</td>
+</tr>
+<tr>
+<td>Malfermi…</td>
+<td>Ctrl+O</td>
+<td>Malfermas unu aŭ plurajn dosierojn (filtro «Tekstoj kaj Monato» = *.txt, *.xml, *.monato, aŭ «Ĉiuj dosieroj»)</td>
+</tr>
+<tr>
+<td>Lastatempe malfermitaj</td>
+<td>—</td>
+<td>Listo de la lastaj 10 dosieroj; «Forigi liston» malplenigas ĝin</td>
+</tr>
+<tr>
+<td>Konservi</td>
+<td>Ctrl+S</td>
+<td>Konservas; se la dokumento ne havas nomon, la programo demandas pri ĝi</td>
+</tr>
+<tr>
+<td>Konservi kiel…</td>
+<td>Ctrl+Shift+S</td>
+<td>Konservas sub nova nomo; la antaŭelektita finaĵo estas .xml (eblas ankaŭ .txt aŭ ĉiuj)</td>
+</tr>
+<tr>
+<td>Fermi la dokumenton</td>
+<td>Ctrl+W</td>
+<td>Fermas la nunan langeton</td>
+</tr>
+<tr>
+<td>Sekva / Antaŭa dokumento</td>
+<td>Ctrl+PgDn / Ctrl+PgUp</td>
+<td>Moviĝas inter la langetoj</td>
+</tr>
+<tr>
+<td>Eliri</td>
+<td>—</td>
+<td>Fermas la programon</td>
+</tr>
+</tbody>
+</table>
+<p>Kelkaj detaloj faciligas la laboron. Se oni malfermas dosieron, kiu jam estas malfermita, la programo simple iras al ĝia langeto. Malplena kaj netuŝita nova dokumento estas reuzata anstataŭ malfermi plian langeton. Kiam oni fermas dokumenton aŭ la tutan programon kun nekonservitaj ŝanĝoj, la programo demandas: Jes (konservi), Ne (forgesi) aŭ Rezigni (nuligi la fermon).</p>
+<h3 id="kodigo-kaj-linifinoj">Kodigo kaj linifinoj</h3>
+<p>Malfermante dosieron, la programo unue provas UTF-8 (kun aŭ sen BOM); se tio ne eblas, ĝi legas la dosieron kiel Windows-1252 kaj lastrezorte kiel Latin-1. En tiu kazo la statobreto avertas, ke la dosiero «estos konservita kiel UTF-8». Konservado estas ĉiam en UTF-8 sen BOM. Se la dosiero havis Windows-linifinojn (CRLF), ili restas tiaj en la konservita dosiero; interne la redaktilo uzas nur ordinarajn linifinojn.</p>
+<h2 id="redaktado-kaj-sercado">Redaktado kaj serĉado</h2>
+<p>La menuo Redakti enhavas la ordinarajn komandojn: Malfari (Ctrl+Z), Refari (Ctrl+Y), Tondi, Kopii kaj Alglui (Ctrl+X, Ctrl+C, Ctrl+V) kaj Elekti ĉion (Ctrl+A). Aldone ĝi ofertas Serĉi kaj anstataŭigi… (Ctrl+F), Serĉi sekvan kaj Serĉi antaŭan (komence sen klavkomando, sed atribueblaj) kaj Iri al linio… (Ctrl+G). Tiu lasta demandas pri numero (nur pozitiva entjero estas akceptata) kaj markas la celitan linion flave ĝis la sekva movo de la kursoro. Tutaj anstataŭigoj, same kiel la efiko de ĉiu kromprogramo, estas malfareblaj per unu Ctrl+Z.</p>
+<h3 id="serci-kaj-anstatauigi">Serĉi kaj anstataŭigi</h3>
+<p>La dialogo de serĉado estas nemodala: ĝi restas malfermita dum oni redaktas. Se estas elektita unulinia teksto, ĝi aperas en la kampo «Serĉi», kaj la agordoj de la dialogo restas inter malfermoj. Oni skribas la serĉatan tekston kaj la anstataŭan tekston («Anstataŭigi per») kaj elektas inter jenaj opcioj:</p>
+<ul>
+<li><strong>Distingi majusklojn</strong>: komence malmarkita, do «A» kaj «a» estas egalaj.</li>
+<li><strong>Regulaj esprimoj</strong>: se markita, la serĉo estas regula esprimo de Python.</li>
+<li><strong>Specialaj signoj</strong>: komence markita; tiam \n, \t, \r\n, \uXXXX, \xHH kaj \ havas sian specialan signifon.</li>
+<li><strong>Serĉi en ĉiuj folioj</strong>: serĉas kaj anstataŭigas en ĉiuj malfermitaj langetoj.</li>
+</ul>
+<p>La butonoj «Serĉi antaŭen» kaj «Serĉi malantaŭen» trovas la sekvan aŭ antaŭan aperon (Enter en la kampo serĉas antaŭen). «Anstataŭigi» anstataŭigas la nune elektitan trovon kaj saltas al la sekva; «Anstataŭigi ĉion» anstataŭigas ĉiujn kaj la statobreto montras ilian nombron. La butono «Helpo» montras fenestron kun specialaj signoj, regulaj esprimoj kaj ekzemploj.</p>
+<p>Kiam la serĉo atingas la finon (aŭ la komencon), ĝi daŭrigas de la alia flanko kaj la statobreto raportas tion. Se nenio estas trovita, aperas «Ne trovita». En la anstataŭa kampo oni povas uzi \1, \2 aŭ \g\<nomo> por grupoj de regula esprimo; nevalida esprimo aŭ nevalida anstataŭo montras erarmesaĝon.</p>
+<p>Tri ekzemploj el la Helpo de la dialogo: por forigi finajn spacojn, serĉu <code>[ \t]+$</code> kaj anstataŭigu per nenio; por ŝanĝi ĉiun alineon en unu linion, serĉu <code>\n\n</code> kaj anstataŭigu per <code>\n</code>; por meti <code>&lt;p&gt;</code> ĉirkaŭ ĉiu linio, serĉu <code>^(.+)$</code> kaj anstataŭigu per <code>&lt;p&gt;\1&lt;/p&gt;</code>.</p>
+<h2 id="etikedoj-kaj-komentoj">Etikedoj kaj komentoj</h2>
+<p>La menuo Etikedoj ĉirkaŭmetas la elektitan tekston per etikedo de Monato; sen elekto ĝi enmetas malplenan paron kaj metas la kursoron inter la du etikedoj.</p>
+<table>
+<thead>
+<tr>
+<th>Menuero</th>
+<th>Etikedo</th>
+<th>Klavkomando</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Artikolo</td>
+<td><code>&lt;art&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Alineo</td>
+<td><code>&lt;p&gt;</code></td>
+<td>Ctrl+Shift+P</td>
+</tr>
+<tr>
+<td>Dika</td>
+<td><code>&lt;d&gt;</code></td>
+<td>Ctrl+B</td>
+</tr>
+<tr>
+<td>Kursiva</td>
+<td><code>&lt;k&gt;</code></td>
+<td>Ctrl+I</td>
+</tr>
+<tr>
+<td>Citiloj</td>
+<td><code>&lt;c&gt;</code></td>
+<td>Ctrl+Shift+Q</td>
+</tr>
+<tr>
+<td>Komento</td>
+<td><code>&lt;!-- --&gt;</code></td>
+<td>Ctrl+Shift+C</td>
+</tr>
+<tr>
+<td>Intertitolo</td>
+<td><code>&lt;it&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Haltostreko</td>
+<td><code>&lt;hs/&gt;</code> (vidu la noton)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Ruĝa</td>
+<td><code>&lt;r&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Malaltigo</td>
+<td><code>&lt;sub&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Altigo</td>
+<td><code>&lt;sup&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Retadreso</td>
+<td><code>&lt;ret&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Aŭtoro</td>
+<td><code>&lt;aut&gt;</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Malgrandaj majuskloj</td>
+<td><code>&lt;mm&gt;</code></td>
+<td>Ctrl+Shift+M</td>
+</tr>
+</tbody>
+</table>
+<p>Noto: la menuero «Haltostreko» portas la nomon <code>&lt;hs/&gt;</code>, sed la programo fakte enmetas paron <code>&lt;hs&gt;&lt;/hs&gt;</code>. La kontrolilo «Etikedoj kaj komentoj» raportas tion kiel eraron; oni korektu mane al <code>&lt;hs/&gt;</code>.</p>
+<p>La redaktilo koloras la etikedojn dum oni skribas. Etikedoj estas bluaj; etikedo, kiu ne troviĝas en la listo de konataj etikedoj de Monato, estas ruĝa kaj substrekita; komento <code>&lt;!-- ... --&gt;</code> estas verda kaj kursiva. La konataj etikedoj estas: art, aut, bib, bibaut, bibt, c, cit, d, foto, hs, inf, it, k, kod, land, lig, lin, loko, mend, mm, n-ro, nl, noto, p, prez, r, ret, retfoto, rub, sinp, ss, sub, sup, sv, t, tab, td, tt. Se la kolorigo estas malŝaltita (vidu la sekcion pri agordoj), ĉiuj koloroj malaperas.</p>
+<h2 id="agordoj">Agordoj</h2>
+<h3 id="opcioj">Opcioj</h3>
+<p>La menuo Opcioj havas tri ŝalteblajn markojn. Ili ne estas konservataj: ĉe ĉiu lanĉo ili revenas al la komencaj valoroj.</p>
+<ul>
+<li><strong>cx → ĉ dum skribado</strong> (komence jes): skribante x post c, g, h, j, s aŭ u (ankaŭ majuskle), la du signoj fariĝas ĉ, ĝ, ĥ, ĵ, ŝ, ŭ. Retropaŝo tuj poste restarigas la du literojn (ekzemple cx). La funkcio ne agas, se estas elektita teksto.</li>
+<li><strong>Aŭtomata linifaldo</strong> (komence jes): longaj linioj faldiĝas je vortlimoj; sen ĝi aperas horizontala ŝovo.</li>
+<li><strong>Kolorigi etikedojn</strong> (komence jes): kolorigas etikedojn kaj komentojn.</li>
+</ul>
+<h3 id="skalo-kaj-tiparo">Skalo kaj tiparo</h3>
+<p>La menuo Vido permesas ŝanĝi la grandon de la tuta interfaco (menuoj, dialogoj, tiparoj, spacoj) de 75 % ĝis 300 %, en paŝoj de 25 %. La ŝanĝo efikas tuj, sen restarto, kaj estas konservata. La klavkomandoj estas Ctrl+plus (pligrandigi), Ctrl+minus (malpligrandigi) kaj Ctrl+0 (normala, 100 %). La fenestro adaptiĝas, krom se ĝi estas maksimumigita. La ero «Fonto…» malfermas dialogon por elekti la tiparon kaj ĝian grandon (8 ĝis 48) en la redaktilo; la elekto ankaŭ estas konservata. Komence la programo serĉas Consolas, DejaVu Sans Mono, Courier New, Liberation Mono aŭ Monospace.</p>
+<h3 id="lingvo">Lingvo</h3>
+<p>La interfaco disponeblas en naŭ lingvoj: Esperanto (eo), Italiano (it), English (en), Deutsch (de), Español (es), Français (fr), Polski (pl), Русский (ru) kaj Українська (uk). La elekto en Vido → Lingvo efikas post restarto de Redaktilo kaj estas konservata en <code>settings.json</code>; oni povas ankaŭ uzi la medivariablon <code>REDAKTILO_LINGVO</code>, ekzemple <code>REDAKTILO_LINGVO=it</code>. Mankanta traduko montriĝas en Esperanto. Por aldoni novan lingvon, oni kopias <code>lingvoj/eo.json</code> al <code>lingvoj/&lt;kodo&gt;.json</code>, tradukas la valorojn kaj restartas la programon (detaloj en <code>lingvoj/LEGUMIN.txt</code>). Kromprogramoj povas havi proprajn tradukojn en dosieroj <code>&lt;kodo&gt;.&lt;nomo&gt;.json</code> en la sama dosierujo.</p>
+<h3 id="klavkomandoj">Klavkomandoj</h3>
+<p>La komencaj klavkomandoj estas jenaj; la ceteraj aperas en la tabeloj de la menuoj.</p>
+<table>
+<thead>
+<tr>
+<th>Grupo</th>
+<th>Komando</th>
+<th>Klavkomando</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dosiero</td>
+<td>Nova / Malfermi / Konservi / Konservi kiel</td>
+<td>Ctrl+N / Ctrl+O / Ctrl+S / Ctrl+Shift+S</td>
+</tr>
+<tr>
+<td>Dosiero</td>
+<td>Fermi la dokumenton; sekva / antaŭa dokumento</td>
+<td>Ctrl+W; Ctrl+PgDn / Ctrl+PgUp</td>
+</tr>
+<tr>
+<td>Redakti</td>
+<td>Refari / Elekti ĉion</td>
+<td>Ctrl+Y / Ctrl+A</td>
+</tr>
+<tr>
+<td>Redakti</td>
+<td>Serĉi kaj anstataŭigi / Iri al linio</td>
+<td>Ctrl+F / Ctrl+G</td>
+</tr>
+<tr>
+<td>Etikedoj</td>
+<td>Alineo, Dika, Kursiva</td>
+<td>Ctrl+Shift+P, Ctrl+B, Ctrl+I</td>
+</tr>
+<tr>
+<td>Etikedoj</td>
+<td>Citiloj, Komento, Malgrandaj majuskloj</td>
+<td>Ctrl+Shift+Q, Ctrl+Shift+C, Ctrl+Shift+M</td>
+</tr>
+<tr>
+<td>Vido</td>
+<td>Pligrandigi / Malpligrandigi / Normala skalo</td>
+<td>Ctrl+plus / Ctrl+minus / Ctrl+0</td>
+</tr>
+</tbody>
+</table>
+<p>Malfari, Tondi, Kopii kaj Alglui uzas la ordinarajn klavojn. Serĉi sekvan, Serĉi antaŭan, Eliri kaj kelkaj etikedoj ne havas komencan klavon, sed oni povas atribui al ili unu. Kromprogramoj povas havi proprajn klavojn; ekzemple la literumilo uzas F7.</p>
+<p>Por ŝanĝi klavkomandon, oni elektas Vido → Klavkombinoj…. La dialogo listigas ĉiujn komandojn, ankaŭ tiujn de kromprogramoj, en kolumnoj Grupo, Funkcio kaj Klavkombino, kaj la kampo «Serĉi» filtras la liston. Oni elektas komandon, duoble alklakas ĝin (aŭ premas Enter aŭ la butonon «Ŝanĝi…») kaj premas la novan kombinon: Ctrl aŭ Alt kun klavo, aŭ funkcian klavon F1–F12. Esc nuligas. Simplaj klavoj sen Ctrl aŭ Alt ne estas akceptataj, ĉar ili servus por skribi. Post konfirmo per «Bone», se la kombino jam apartenas al alia komando, la programo demandas, ĉu transpreni ĝin. La butono «Forigi klavon» lasas la komandon sen klavo, «Komenca valoro» restarigas la elektitan komandon kaj «Restarigi ĉiujn» ĉiujn komandojn. La ŝanĝoj efikas tuj kaj estas aŭtomate konservataj.</p>
+<h3 id="dosieroj-de-agordoj">Dosieroj de agordoj</h3>
+<p>La dosiero <code>settings.json</code> enhavas la lingvon, la interfacan skalon (<code>interfaca_skalo</code>), la tiparon kaj ĝian grandon kaj la lastatempe malfermitajn dosierojn; <code>klavkombinoj.json</code> enhavas la proprajn klavkomandojn. Ambaŭ troviĝas en la dosierujo Redaktilo de la agorda loko de la sistemo (vidu la sekcion «Lanĉo»). Se la skalo en <code>settings.json</code> estas ekster la limoj 75–300 aŭ ne valida, la programo uzas 100 %.</p>
+<h3 id="la-menuo-helpo">La menuo Helpo</h3>
+<p>La menuo Helpo, la lasta en la menubreto, havas du erojn. «Teknikaj konvencioj de Monato…» malfermas en la retumilo la paĝon https://www.monato.be/red/tek_konv.php (se la retumilo ne malfermiĝas, aperas erarmesaĝo kun la adreso). «Pri la programo…» montras fenestron kun la nomo kaj versio de Redaktilo, mallongan priskribon, la dosierujon de la kromprogramoj, la dosierujon de la lingvaj pakaĵoj kaj la rimarkon, ke nova kromprogramo estas nova .py-dosiero en tiu dosierujo, sekvata de Kromprogramoj → Reŝargi kromprogramojn; la licenco estas en la dosiero <code>LICENCO.txt</code>.</p>
+<h1 id="dua-parto-la-kromprogramoj">Dua parto: la kromprogramoj</h1>
+<h2 id="kromprogramoj-generale">Kromprogramoj ĝenerale</h2>
+<p>Kromprogramoj estas .py-dosieroj en la dosierujo <code>kromprogramoj</code> apud la programo. Ili aperas en la menuo Kromprogramoj, grupigitaj laŭ kategorioj (Konvertiloj, Kontroliloj, Literumilo, Aliaj iloj); ene de kategorio la ordo sekvas la dosiernomojn. Dosieroj, kies nomo komenciĝas per «_», ne estas ŝargataj; la dosiero <code>_example.py</code> servas kiel modelo. La menuo Kromprogramoj enhavas ankaŭ du helpajn erojn: «Reŝargi kromprogramojn» relegas la dosierujon sen restarto (la statobreto diras, kiom da funkcioj estis ŝargitaj), kaj «Malfermi la dosierujon de kromprogramoj» malfermas ĝin per la dosieradministrilo de la sistemo. Rompita kromprogramo ne haltigas la redaktilon: ĝi aperas kiel ero «⚠ dosiero: eraro», kaj alklako montras la kialon.</p>
+<p>La dek du kromprogramoj liveritaj kun Redaktilo kovras la tutan vojon de kruda teksto ĝis preta artikolo. La sekva tabelo montras ilin en la sama ordo kiel en la menuo.</p>
+<table>
+<thead>
+<tr>
+<th>Kategorio</th>
+<th>Menuero</th>
+<th>Dosiero</th>
+<th>Ŝanĝas la tekston?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Konvertiloj</td>
+<td>Teksto → XML-dokumento</td>
+<td><code>conv_art.py</code></td>
+<td>Jes (tuta teksto)</td>
+</tr>
+<tr>
+<td>Konvertiloj</td>
+<td>Teksto → intervjuo</td>
+<td><code>conv_interv.py</code></td>
+<td>Jes (tuta teksto)</td>
+</tr>
+<tr>
+<td>Konvertiloj</td>
+<td>cx → ĉ kaj ĉ → cx</td>
+<td><code>esperanto.py</code></td>
+<td>Jes (elekto aŭ tuto)</td>
+</tr>
+<tr>
+<td>Konvertiloj</td>
+<td>HTML-kodoj → UTF8</td>
+<td><code>html_entities.py</code></td>
+<td>Jes (elekto aŭ tuto)</td>
+</tr>
+<tr>
+<td>Konvertiloj</td>
+<td>Teksto → Ŝlosilvortoj</td>
+<td><code>keywords.py</code></td>
+<td>Jes, post konfirmo</td>
+</tr>
+<tr>
+<td>Kontroliloj</td>
+<td>Mankantaj komoj</td>
+<td><code>comma_checker.py</code></td>
+<td>Ne</td>
+</tr>
+<tr>
+<td>Kontroliloj</td>
+<td>Misdividoj</td>
+<td><code>esperanto_hyphenation.py</code></td>
+<td>Ne</td>
+</tr>
+<tr>
+<td>Kontroliloj</td>
+<td>Antaŭrigardo en la retumilo</td>
+<td><code>previews.py</code></td>
+<td>Ne</td>
+</tr>
+<tr>
+<td>Kontroliloj</td>
+<td>Etikedoj kaj komentoj</td>
+<td><code>validator.py</code></td>
+<td>Ne</td>
+</tr>
+<tr>
+<td>Literumilo</td>
+<td>Kontrolo ekde la kursoro (F7), Listo de nekonataj vortoj, Aldonu al la vortaro</td>
+<td><code>spell_check.py</code></td>
+<td>Nur per anstataŭigoj kaj aldonoj, kiujn vi elektas</td>
+</tr>
+<tr>
+<td>Aliaj iloj</td>
+<td>Kvanto de tajperoj</td>
+<td><code>count.py</code></td>
+<td>Ne</td>
+</tr>
+<tr>
+<td>Aliaj iloj</td>
+<td>Rekonstruilo de alineoj</td>
+<td><code>reconstruct_paragraphs.py</code></td>
+<td>Jes (elekto aŭ tuto)</td>
+</tr>
+</tbody>
+</table>
+<p>La ordo de uzo ne estas deviga, sed la iloj rilatas unu al la alia. Konvena laborordo estas jena: unue rekonstrui la alineojn de rompita teksto, poste konverti cx kaj HTML-kodojn, tiam krei la artikolan skeleton, kaj fine kontroli (literumilo, komoj, misdividoj, etikedoj), rigardi la antaŭrigardon kaj kalkuli la longon. Ĉiu ŝanĝo farita de kromprogramo estas malfarebla per unu Ctrl+Z.</p>
+<h2 id="konvertiloj">Konvertiloj</h2>
+<p>La kategorio Konvertiloj ŝanĝas la tekston. En la menuo la eroj sekvas la ordon: Teksto → XML-dokumento, Teksto → intervjuo, cx → ĉ, ĉ → cx, HTML-kodoj → UTF8, Teksto → Ŝlosilvortoj. Ĉiu el ili estas malfarebla per Ctrl+Z, kaj neniu havas klavkomandon komence (atribueblas per Vido → Klavkombinoj…).</p>
+<h3 id="teksto-xml-dokumento-conv-art-py">Teksto → XML-dokumento (conv_art.py)</h3>
+<p>Tiu konvertilo transformas simplan tekston en artikolan skeleton de Monato. Ĝi agas sur la tuta dokumento (la elekto ne gravas) kaj tute anstataŭas la nunan tekston per jena strukturo: la kapo <code>&lt;!DOCTYPE art SYSTEM "monato.dtd"&gt;</code> kaj malplena komento; la etikedo <code>&lt;art&gt;</code> kun la kampoj <code>&lt;rub&gt;</code> (rubriko), <code>&lt;inf&gt;</code> (prioritato), <code>&lt;sv&gt;</code> (ŝlosilvortoj), <code>&lt;n-ro&gt;</code> (kun «??????») kaj malplenaj <code>&lt;tt&gt;</code> kaj <code>&lt;t&gt;</code>, kiujn oni plenigu; poste, por ĉiu ne malplena linio, la linio (sen antaŭaj kaj postaj spacoj) ĉirkaŭmetita per <code>&lt;p&gt;...&lt;/p&gt;</code> (malplenaj linioj ne fariĝas malplenaj alineoj); fine <code>&lt;kod&gt;&lt;/kod&gt;</code>, <code>&lt;aut&gt;Nomo &lt;mm&gt;FamiliaNomo&lt;/mm&gt;&lt;/aut&gt;</code>, nova malplena komento kaj <code>&lt;/art&gt;</code>. Kiam ĝi finas, aperas la mesaĝo «Konvertita al Monato-artikolo (Ctrl+Z por malfari)».</p>
+<p>La kampo <code>&lt;sv&gt;</code> estas plenigata aŭtomate: la programo kolektas ĉiujn vortojn kaj nomojn, kiuj komenciĝas per majusklo (A–Z; sinsekvaj majuskle komencitaj vortoj en la sama linio kalkuliĝas kiel unu nomo, ekzemple «Maria Kuri»), forigas la duoblojn, ordigas ilin kaj apartigas per komo. La enhavo de la etikedoj sv, inf, kod, n-ro, aut, land kaj rub, la komentoj, la aliaj etikedoj kaj la HTML-kodoj ne kalkuliĝas. Se la teksto estas «Hodiaŭ Maria Kuri vizitis Parizon.» sekvata de la alineo «Ŝi parolis pri la kongreso.», la kampo <code>&lt;sv&gt;</code> enhavos «Hodiaŭ, Maria Kuri, Parizon» kaj la du alineoj aperos kiel <code>&lt;p&gt;</code>.</p>
+<p>La rubriko kaj la prioritato estas fiksaj: «Politiko» kaj «prio 3». Por ŝanĝi ilin (aŭ la kapon), oni redaktas la konstantojn <code>RUBRICA</code>, <code>PRIORITA</code> kaj <code>INTESTAZIONE</code> en la komenco de <code>conv_art.py</code> kaj poste elektas Kromprogramoj → Reŝargi kromprogramojn.</p>
+<p>Tri atentindaĵoj. Se la teksto jam enhavas <code>&lt;art&gt;</code>, la programo avertas, ke ĝi ŝajnas jam esti artikolo, kaj demandas, ĉu konverti tamen. Ĉiu linio fariĝas alineo; se la teksto havas linifinojn meze de alineoj (ekzemple kopiita el PDF), unue korektu ĝin per la rekonstruilo de alineoj (vidu la sekcion «Aliaj iloj»). Kaj la ŝlosilvortoj estas nur propono: ili enhavas ankaŭ vortojn, kiuj nur komencas frazon, kaj la programo ne trovas vortojn komencitajn per Ĉ, Ĝ, Ĥ, Ĵ, Ŝ aŭ Ŭ; oni kontrolu kaj purigu la liston mane. La teksto mem ne estas modifata: signoj kiel &amp; aŭ &lt; restas kiel en la originalo.</p>
+<h3 id="teksto-intervjuo-conv-interv-py">Teksto → intervjuo (conv_interv.py)</h3>
+<p>Tiu konvertilo faras similan laboron por intervjuoj: ĝi konservas la originalan tekston de ĉiu alineo en komento kaj preparas lokon por la faktokontrolo. Ankaŭ ĝi agas sur la tuta dokumento kaj finas per la mesaĝo «Konvertita al Monato-intervjuo (Ctrl+Z por malfari)». La nova teksto konsistas el: kapo kun <code>&lt;!DOCTYPE art SYSTEM "monato.dtd"&gt;</code> kaj komento kun la frazo «verkita kaj redaktita de [Aŭtoro] [Familia nomo] redaktita sed NEreviziita versio» kaj linio «revizita de»; <code>&lt;art&gt;</code> kun la kampoj <code>&lt;rub&gt;</code>, <code>&lt;inf&gt;</code>, <code>&lt;sv&gt;</code> (malplena) kaj <code>&lt;n-ro&gt;</code> («??????»); por ĉiu ne malplena linio, alineo <code>&lt;p&gt;</code> kun la linio (enŝovita per kvar spacoj), sekvata de du komentoj: <code>&lt;!-- originala teksto ... --&gt;</code> kun kopio de la linio kaj malplena <code>&lt;!-- faktokontrolo --&gt;</code> por viaj notoj; kaj fine <code>&lt;kod&gt;</code>, <code>&lt;aut&gt;</code> kun nomo kaj familia nomo (<code>&lt;mm&gt;</code>), komento por fina noto kaj <code>&lt;/art&gt;</code>. Diference de la artikola konvertilo, ĝi ne kreas ŝlosilvortojn kaj ne aldonas <code>&lt;tt&gt;</code> nek <code>&lt;t&gt;</code>.</p>
+<p>La komencaj valoroj estas en la komenco de <code>conv_interv.py</code> kaj estas plejparte malplenaj, do konvenas ŝanĝi ilin unufoje (poste elektu Kromprogramoj → Reŝargi kromprogramojn):</p>
+<table>
+<thead>
+<tr>
+<th>Konstanto</th>
+<th>Signifo</th>
+<th>Komence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RUBRICA</code></td>
+<td>Rubriko (<code>&lt;rub&gt;</code>)</td>
+<td>(malplena)</td>
+</tr>
+<tr>
+<td><code>PRIORITA</code></td>
+<td>Prioritato (<code>&lt;inf&gt;</code>)</td>
+<td>prio x</td>
+</tr>
+<tr>
+<td><code>KOD</code></td>
+<td>Enhavo de <code>&lt;kod&gt;</code></td>
+<td>(malplena)</td>
+</tr>
+<tr>
+<td><code>AUTORE</code></td>
+<td>Antaŭnomo de la aŭtoro (en la kapo kaj en <code>&lt;aut&gt;</code>)</td>
+<td>(malplena)</td>
+</tr>
+<tr>
+<td><code>COGNOME</code></td>
+<td>Familia nomo (en la kapo kaj en <code>&lt;aut&gt;&lt;mm&gt;</code>)</td>
+<td>(malplena)</td>
+</tr>
+<tr>
+<td><code>NOTA_FINALE</code></td>
+<td>Teksto de la fina komento</td>
+<td>(malplena)</td>
+</tr>
+</tbody>
+</table>
+<p>Kiel en la artikola konvertilo, se la teksto jam enhavas <code>&lt;art&gt;</code>, la programo avertas kaj demandas, ĉu konverti tamen; ĉiu linio fariĝas alineo, do la linioj ne estu rompitaj meze de alineo; kaj la teksto ne estas modifata (&amp; kaj &lt; restas).</p>
+<h3 id="cx-c-kaj-c-cx-esperanto-py">cx → ĉ kaj ĉ → cx (esperanto.py)</h3>
+<p>Tiu kromprogramo konvertas inter la x-sistemo (cx, gx, hx, jx, sx, ux) kaj la supersignaj literoj (ĉ, ĝ, ĥ, ĵ, ŝ, ŭ). Diference de la opcio «cx → ĉ dum skribado», ĝi agas sur jam skribita teksto. La menuero «cx → ĉ» ŝanĝas ĉiujn parojn de c, g, h, j, s aŭ u kun x en supersignajn literojn; «ĉ → cx» faras la kontraŭan laboron.</p>
+<p>Se estas elektita teksto, nur la elekto estas konvertata; sen elekto la tuta dokumento (kaj la kursoro reiras al la komenco). Netuŝitaj restas la etikedoj (<code>&lt;p&gt;</code>, <code>&lt;art&gt;</code> ktp. kun siaj atributoj), la enhavo de <code>&lt;ret&gt;...&lt;/ret&gt;</code> (do retadresoj) kaj la komentoj <code>&lt;!-- ... --&gt;</code> (escepte se la komento mem enhavas la signon &gt;). La konverto cx → ĉ akceptas ĉiujn kombinojn de grandaj kaj malgrandaj literoj: Cx, cx, CX kaj cX fariĝas Ĉ, ĉ, Ĉ kaj ĉ, do «CXAMBRO» fariĝas «ĈAMBRO». La konverto ĉ → cx redonas «Cx» por la majusklo kaj «cx» por la minusklo, neniam «CX».</p>
+<p>Atentu: la kromprogramo konvertas ĉiun trovitan paron sen kompreni la lingvon. Fremdaj vortoj kaj nomoj kun tiaj paroj estas difektataj; ekzemple «Linux» (ux) fariĝas «Linŭ». Kontrolu la rezulton aŭ konvertu nur elekton.</p>
+<h3 id="html-kodoj-utf-8-html-entities-py">HTML-kodoj → UTF-8 (html_entities.py)</h3>
+<p>Tiu kromprogramo anstataŭas HTML-kodojn (entojn), ekzemple <code>&amp;Uuml;</code> aŭ <code>&amp;#233;</code>, per la respondaj UTF-8-signoj. Ĝi konvertas la elekton aŭ, se nenio estas elektita, la tutan dokumenton, kaj uzas la vortaron <code>vortaroj/html_entoj.txt</code>.</p>
+<p>Konvertataj estas la nomitaj entoj el la vortaro, kiu entenas la nomitajn signoreferencojn de HTML5 (pli ol 2200 linioj), sed nur la formoj kun fina punktokomo (<code>&amp;eacute;</code> → é, <code>&amp;Uuml;</code> → Ü, <code>&amp;hellip;</code> → …, <code>&amp;mdash;</code> → —, <code>&amp;quot;</code> → "), kaj la dekumaj kaj deksesumaj nombraj entoj (<code>&amp;#233;</code> kaj <code>&amp;#xE9;</code> → é); nevalidaj kodoj (pli ol 10FFFF aŭ en la zono de surogatoj D800–DFFF) restas. Netuŝitaj restas <code>&amp;amp;</code>, <code>&amp;lt;</code> kaj <code>&amp;gt;</code> (kun iliaj nombraj ekvivalentoj), ĉar alie la XML rompiĝus; same restas entoj ne trovitaj en la vortaro kaj formoj sen fina punktokomo.</p>
+<p>Tri atentindaĵoj. Spacaj entoj, ekzemple <code>&amp;nbsp;</code>, fariĝas la responda nevidebla signo (nerompebla spaco, U+00A0), kiu aspektas kiel ordinara spaco. Kontraste al la konvertilo cx → ĉ, la kromprogramo ne protektas etikedojn: entoj en atributoj kaj inter etikedoj estas konvertataj same, kaj <code>&amp;quot;</code> fariĝas '"', kio povas rompi atributon inter citiloj. Kaj la kromprogramo ne sciigas la nombron de konvertoj: kontrolu la rezulton kaj, se necese, malfaru per Ctrl+Z. Se <code>html_entoj.txt</code> mankas, aperas eraro «La vortaro html_entoj.txt ne estis trovita.»; aliaj eraroj montriĝas kiel «Eraro dum konvertado: ...». Konvenas fari tiun konverton antaŭ la kontroliloj kaj antaŭ «Kvanto de tajperoj», por ke la signoj estu kalkulataj precize.</p>
+<h3 id="teksto-slosilvortoj-keywords-py">Teksto → Ŝlosilvortoj (keywords.py)</h3>
+<p>Tiu konvertilo kolektas la vortojn kaj nomojn kun majuskla komenco kaj metas ilin en la kampon <code>&lt;sv&gt;</code> de la artikolo. Ĝi uzas la saman kolekton kiel «Teksto → XML-dokumento», sed nur por tiu kampo, kaj utilas por ĝisdatigi la ŝlosilvortojn post redaktoj. Ĝi kontrolas la tutan dokumenton, montras la nombron kaj la unuajn 400 signojn de la listo, kaj demandas antaŭ ŝanĝi la tekston. Se neniu vorto kun majuskla komenco troviĝas, aperas «Neniu vorto kun majuskla komenco trovita.»</p>
+<p>Se la teksto jam enhavas <code>&lt;sv&gt;...&lt;/sv&gt;</code> (ekster komentoj), aperas la demando «Trovitaj N vortoj. Ĉu anstataŭigi la enhavon de <code>&lt;sv&gt;</code>?»; responde Jes, la enhavo de la unua <code>&lt;sv&gt;</code> estas anstataŭigita per la nova listo (malfarebla per Ctrl+Z). Se <code>&lt;sv&gt;</code> ne ekzistas, la demando estas «Ĉu enmeti <code>&lt;sv&gt;</code> ĉe la kursoro?»; responde Jes, la programo enmetas <code>&lt;sv&gt;Vorto1, Vorto2, ...&lt;/sv&gt;</code> ĉe la kursoro, do metu la kursoron en la dezirata loko antaŭe. La listo estas farata same kiel en la artikola konvertilo: la jam ekzistanta ŝlosilvortlisto ne influas la novan, la duoblaj eroj estas forigitaj, la ordo estas tiu de la komputila signaro (A–Z, poste literoj kiel Ĉ aŭ Ŝ, ne la Esperanta alfabeta ordo) kaj la eroj estas apartigitaj per komo kaj spaco.</p>
+<p>Atentu: la listo estas nur propono, ĉar ĝi enhavas ankaŭ vortojn majuskle skribitajn nur ĉe la komenco de frazo kaj ne trovas vortojn komencitajn per Ĉ, Ĝ, Ĥ, Ĵ, Ŝ aŭ Ŭ; purigu ĝin mane. Se estas pluraj <code>&lt;sv&gt;</code>, nur la unua estas ĝisdatigata.</p>
+<h2 id="kontroliloj">Kontroliloj</h2>
+<p>La kategorio Kontroliloj serĉas problemojn en la teksto kaj raportas ilin en la panelo de rezultoj, sen ŝanĝi la tekston. Ĉiuj kontrolas la tutan dokumenton (la elekto ne gravas) kaj ne havas klavkomandon komence. En la menuo ili sekvas la ordon: Mankantaj komoj, Misdividoj, Antaŭrigardo en la retumilo, Etikedoj kaj komentoj.</p>
+<h3 id="mankantaj-komoj-comma-checker-py">Mankantaj komoj (comma_checker.py)</h3>
+<p>Tiu kontrolilo trovas lokojn, kie verŝajne mankas komo antaŭ «ke», ki-vortoj kaj similaj esprimoj, kaj proponas la korekton; ĝi neniam ŝanĝas la tekston. Ĝi uzas la vortaron <code>vortaroj/vortaro_komoj.txt</code>. Ĉe ĉiu uzo la rezulto aperas en panelo kun la titolo «Vortaraj esprimoj trovitaj: N», unu linio por ero, ekzemple «linio 12: «diris ke» → «diris, ke»» (la propono montras nur la vorton tuj antaŭ la esprimo). Duobla alklako (aŭ Enter) saltas al la linio; poste oni korektas la tekston mem, kaj la panelo restas ĝis oni fermas ĝin per ✕. Se nenio estas trovita, aperas «Neniu vortara esprimo trovita.»</p>
+<p>La kontrolilo legas la vortaron kaj serĉas ĉiun esprimon kiel tutan vorton (aŭ vortgrupon), sen distingo inter majuskloj kaj minuskloj; la vortoj de grupo povas esti disigitaj per spacoj, sed la grupo ne trapasas linifinon. Komentoj kaj etikedoj estas ignoritaj, kaj ilia enhavo ne kalkuliĝas. Se unu esprimo enhavas pli mallongan (ekzemple «de kiu» enhavas «kiu»), nur la plej longa estas raportata. Ero estas raportata nur se antaŭ la esprimo, en la sama linio, staras vorto sen komo: neniu raporto aperas, se tuj antaŭe jam estas komo, se la esprimo komenciĝas la linion, se la antaŭa signo ne estas litero aŭ cifero (punkto, dupunkto, citilo, krampo ktp.), nek se la antaŭa vorto estas «kaj» aŭ «aŭ», ĉar tie komo ne necesas.</p>
+<p>La vortaro estas dosiero kun unu esprimo po linio; linioj komencitaj per # estas komentoj. Ĝi enhavas simplajn vortojn (ke, kiu, kiun, kiuj, kiam, kial, kie, kies, kio, kion, kia, kiom ktp.), prepoziciojn kun kiu/kiuj/kio/kies (al kiu, de kies, per kio, sen kiuj…), tempajn kaj lokajn kombinojn (de kiam, post kiam, ekde kiam, ĝis kie, tra kie…) kaj konjunkciojn kaj frazojn (tiel ke, tial ke, tial ĉar, por ke, la fakto ke, kun la kondiĉo ke, pro tio ke…). Por aldoni esprimon oni skribas ĝin en novan linion de <code>vortaro_komoj.txt</code> kaj lanĉas la kontrolilon denove; la dosiero estas relegata ĉe ĉiu lanĉo. Se ĝi mankas, aperas eraro kun ĝia vojo; se ĝi estas malplena: «La vortaro estas malplena.»</p>
+<p>La kontrolilo konas nur la vortaron, ne la sintakson, do kelkaj trovoj povas esti falsaj (ekzemple demandoj, kie komo ne necesas), kaj esprimo ĉe la komenco de linio ne estas raportata, eĉ se la antaŭa linio finas sen komo. Ĉiu proponita korekto estu kontrolita de homo.</p>
+<h3 id="misdividoj-esperanto-hyphenation-py">Misdividoj (esperanto_hyphenation.py)</h3>
+<p>Tiu kontrolilo trovas vortojn, kiuj estas dividitaj per streketo ĉe la fino de linio, sed en loko, kiu estas nek morfologia nek silaba limo en Esperanto. Ĝi bezonas la Esperanto-vortaron de LibreOffice (<code>vortaroj/eo/eo.aff</code> kaj <code>eo.dic</code>) kaj la pakaĵon spylls; se unu mankas, aperas averto kun la kialo. La rezulto aperas en panelo kun la titolo «Esperantaj vortdividoj: N suspektinda(j)», kie duobla alklako saltas al la unua linio de la divido; se nenio estas trovita, aperas «Neniu suspektinda Esperanto-vortdivido trovita.»</p>
+<p>La ilo serĉas vortojn, kiuj finas linion per streketo kaj daŭras en la sekva linio, ekzemple «esper-» + «anto». Ekzistantaj silabaj streketoj antaŭe en la sama vorto estas forigataj («es-pe-» + «ranto» = «esperanto»). Etikedoj, komentoj kaj HTML-kodoj estas ignoritaj, kaj Windows-linifinoj funkcias same. Ero estas raportata nur se plenumiĝas tri kondiĉoj. Unue, la tuta vorto (la du partoj kune) estas konata en la vortaro; nekonataj vortoj ne estas juĝataj. Due, la divido ne estas morfologia limo; akceptataj estas la limoj inter prefikso (bo, dis, ek, eks, ge, mal, mis, pra, re, sen, sub, super, trans) kaj radiko, inter radiko kaj sufikso aŭ participa formo (ekz. -ig-, -in-, -ant-, -int-), inter radiko kaj gramatika finaĵo, kaj inter la komponantoj de kunmetaĵo, kaj por ĉiu radiko la vortaro devas konfirmi la analizon. Trie, la divido ne estas silaba limo; la silabigo uzas la vokalojn kiel kernojn, aŭ, eŭ, aj, ej, oj, uj estas unu kerno, unusola konsonanto iras al la sekva silabo (pa-tro, ŝi-po), kaj en konsonanta grupo la plej longa ebla komenco el listo (bl, br, dr, fl, fr, gl, gr, kl, kr, pl, pr, tr, kv, gv, sc, sk, sl, sm, sn, sp, st, sv, ŝv, vr) iras al la sekva silabo (ins-tru-is-to, es-pe-ran-to). Tiel «pa-tro», «vir-inoj» (morfologia), «ĉef-strato» (kunmetaĵo) kaj «mal-lumo» estas akceptataj, dum «esper-anto» kaj «ŝip-o» estas raportataj. La «propono» en la raporto montras la plenan silabigon de la vorto; ĝi estas gvido, ne ordono, ĉar la morfologia divido povas esti pli bona ol la silaba.</p>
+<p>La analizo estas intence singarda: ĝi preferas silenti ol akuzi. Nekonataj vortoj, nomoj, kunmetaĵoj kun ordinara streketo («esperanto-vort-aro») kaj vortoj kun nekonataj radikoj ne estas raportataj. Nur linioj, kiuj finas per streketo, estas kontrolataj; vortoj rompitaj sen streketo ne estas trovataj. La kontrolo uzas la ĝeneralan vortaron kaj ne konsultas la propran vortaron (<code>propra.txt</code>) de la literumilo. La rezulto do bezonas homan juĝon. Por programistoj: testoj de la silabigo kaj de la analizo troviĝas en <code>tests/test_esperanto_hyphenation.py</code> kaj lanĉeblas per <code>python -m unittest discover -s tests</code>.</p>
+<h3 id="antaurigardo-en-la-retumilo-previews-py">Antaŭrigardo en la retumilo (previews.py)</h3>
+<p>Tiu ilo montras la artikolon kiel HTML-paĝon en la ĉefa retumilo de la sistemo, por vidi proksimume, kiel la tekstoj aspektos. Ĝi uzas la tutan dokumenton, eĉ se ĝi ne estas konservita, kaj ŝanĝas nek la dokumenton nek la dosieron sur la disko. La nuna teksto estas skribata en provizoran dosierujon de la sistemo (kun nomo komencanta per <code>monato_</code>) kiel <code>articolo.xml</code>; la modulo <code>htmlumilo.py</code> konvertas ĝin al <code>articolo.html</code>, kaj la programo malfermas tiun dosieron per la implicita retumilo. La provizoraj dosieroj ne estas forigataj de la programo; la sistemo purigas la provizoran dosierujon mem.</p>
+<p>Por sukcesa konverto la teksto devas esti bone formita XML: unu radika etikedo <code>&lt;art&gt;</code>, ĉiuj etikedoj fermitaj kaj ĝuste enigitaj unu en la alia, kaj la signoj &amp; kaj &lt; skribitaj kiel <code>&amp;amp;</code> kaj <code>&amp;lt;</code>. Alie la panelo montras mesaĝon kiel «❌ Eraro dum analizo de XML: no element found: line 11, column 0» (la teksto post la dupunkto estas la teknika mesaĝo de la XML-legilo, angle; la linio rilatas al la teksto en la redaktilo). Se la konverto trovis problemojn, sed la paĝo tamen estis kreita, la panelo montras «Antaŭvido malfermita, kun avertoj»; se la paĝo ne povis esti kreita, ĝi montras «Antaŭvido malsukcesis» kaj la kialon.</p>
+<p>La paĝo montras supre linion «Lunghezza dell’articolo: N caratteri» (itale), kun la longo de la artikolo ekde <code>&lt;tt&gt;</code>, kalkulita post konverto de HTML-kodoj kaj de cx; nur tiu linio estas itala. Poste <code>&lt;t&gt;</code> aperas kiel ĉefa titolo, <code>&lt;tt&gt;</code> kiel dua titolo, <code>&lt;it&gt;</code> kiel intertitolo kaj <code>&lt;p&gt;</code> kiel alineo. Formatado: <code>&lt;d&gt;</code> dika, <code>&lt;k&gt;</code> kursiva, <code>&lt;r&gt;</code> ruĝa, <code>&lt;mm&gt;</code> malgrandaj majuskloj, <code>&lt;sub&gt;</code> kaj <code>&lt;sup&gt;</code>. Citiloj <code>&lt;c&gt;</code> fariĝas „citaĵo“ (supraj citiloj „ “, enaj ‚ ‘); <code>&lt;hs/&gt;</code> fariĝas streko —, <code>&lt;nl/&gt;</code> novlinio, <code>&lt;ss/&gt;</code> substreko; <code>&lt;ret&gt;</code> fariĝas alklakebla ligilo (retpoŝto kun mailto:). Rubriko, aŭtoro, ŝlosilvortoj, landoj, bibliografio, fotoj, notoj, citoj, sinprezento kaj tabeloj (<code>&lt;tab&gt;</code>, <code>&lt;lin&gt;</code>, <code>&lt;td&gt;</code>) havas sian aspekton; servaj etikedoj (inf, n-ro, kod, loko, lig, mend, retfoto) aperas grize en la formo «[etikedo: enhavo]»; komentoj ne aperas. Etikedo sen respondo en la konverto aperas en oranĝa punktita kadro, kaj la panelo diras «Etikedo sen respondo en HTML: \<nomo>»; tiu averto aperas nur unu fojon por ĉiu etikedo ĝis la sekva restarto de Redaktilo.</p>
+<p>La paĝo estas nur proksimuma antaŭvido: ĝi ne montras la veran paĝigon de Monato kaj ne kontrolas la konvenciojn de la etikedoj; por tio uzu la kontrolilon de etikedoj, priskribitan sube.</p>
+<h3 id="etikedoj-kaj-komentoj-validator-py">Etikedoj kaj komentoj (validator.py)</h3>
+<p>Tiu kontrolilo kontrolas la strukturon de la etikedoj de Monato kaj de la HTML-komentoj; ĝi estas Python-versio de la iama <code>validatore.php</code>. Ĝi neniam ŝanĝas la tekston. La rezulto estas panelo kun la titolo «Kontrolo: N problemo» aŭ «Kontrolo: N problemoj», ordigita laŭ linio (duobla alklako saltas al la linio; la numero estas tiu de la etikedo mem); se nenio estas trovita, aperas informa fenestro «Neniu eraro trovita.»</p>
+<p>La kontrolilo raportas jenajn erarojn:</p>
+<table>
+<thead>
+<tr>
+<th>Mesaĝo</th>
+<th>Signifo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Etikedo ne antaŭvidita de la konvencioj: <code>&lt;nomo&gt;</code></td>
+<td>La etikedo ne estas en la listo de konataj etikedoj de Monato (vidu la sekcion «Etikedoj kaj komentoj»). Majuskloj ne egalas minusklojn: <code>&lt;P&gt;</code> estas nekonata</td>
+</tr>
+<tr>
+<td>Mankas ferma etikedo: <code>&lt;x&gt;</code> neniam fermiĝas</td>
+<td>Malfermita etikedo ne havas fermon</td>
+</tr>
+<tr>
+<td><code>&lt;x&gt;</code> ne fermita (antaŭ <code>&lt;/y&gt;</code> en linio N)</td>
+<td>Alia etikedo estas fermita, dum <code>&lt;x&gt;</code> ankoraŭ estas malfermita (nestado rompita)</td>
+</tr>
+<tr>
+<td>Fermo sen malfermo: <code>&lt;/x&gt;</code></td>
+<td>Ferma etikedo sen la responda malferma</td>
+</tr>
+<tr>
+<td>Senbezona fermo <code>&lt;/x&gt;</code> (malplena etikedo)</td>
+<td>Ferma etikedo por mem-fermanta etikedo (hs, nl, ss aŭ mend), aŭ por etikedo skribita kiel <code>&lt;x/&gt;</code></td>
+</tr>
+<tr>
+<td>Teksto ekster etikedo ene de <code>&lt;art&gt;</code></td>
+<td>Libera teksto rekte en <code>&lt;art&gt;</code>, ne en <code>&lt;p&gt;</code>, <code>&lt;tt&gt;</code> ktp.</td>
+</tr>
+<tr>
+<td>Entenita komento</td>
+<td>Komento komenciĝas ene de alia komento</td>
+</tr>
+<tr>
+<td>Fermo de komento sen malfermo</td>
+<td><code>--&gt;</code> sen antaŭa <code>&lt;!--</code></td>
+</tr>
+<tr>
+<td>Nefermita komento</td>
+<td><code>&lt;!--</code> sen <code>--&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>La etikedoj hs, nl, ss kaj mend estas malplenaj (mem-fermantaj): oni skribu ilin kiel <code>&lt;hs/&gt;</code>, <code>&lt;nl/&gt;</code>, <code>&lt;ss/&gt;</code> aŭ <code>&lt;mend .../&gt;</code>, kaj ili ne bezonas fermon. Tial la menuero «Haltostreko» de la menuo Etikedoj, kiu enmetas <code>&lt;hs&gt;&lt;/hs&gt;</code>, kaŭzas la raporton «Senbezona fermo <code>&lt;/hs&gt;</code>»; oni korektu al <code>&lt;hs/&gt;</code>.</p>
+<p>La kontrolilo ne rigardas la atributojn de etikedoj, nek la ordon de la kampoj (rub, inf, sv, n-ro, tt, t…), nek ĉu necesaj kampoj ekzistas; ĝi kontrolas nur la nomojn, la nestadon kaj la komentojn. Komentoj estas ignoritaj dum la kontrolo de etikedoj, escepte se ili mem estas rompitaj; tiam la etikedoj en la rompita komento estas kontrolataj. La linio <code>&lt;!DOCTYPE ...&gt;</code> ne estas konsiderata etikedo. Unu rompita etikedo povas kaŭzi plurajn erarojn, ĉar la sekvaj etikedoj aspektas nefermitaj; oni korektu la unuan eron kaj kontrolu denove.</p>
+<h2 id="literumilo-spell-check-py">Literumilo (spell_check.py)</h2>
+<p>La kategorio Literumilo havas unu kromprogramon kun tri menueroj. Ĝi kontrolas la Esperanto-literumadon per la vortaro Hunspell de LibreOffice kaj la biblioteko spylls, do bezonas la pakaĵon spylls kaj la vortaron en <code>vortaroj/eo</code> (<code>eo.aff</code> kaj <code>eo.dic</code>); se io mankas, aperas averto kun la kialo. La vortaro estas ŝargata unu fojon po lanĉo de la programo. La tri menueroj estas: <strong>Kontrolo ekde la kursoro</strong> (klavo F7), kiu kontrolas la tekston unu nekonatan vorton post alia, kun dialogo kaj proponoj; <strong>Listo de nekonataj vortoj</strong>, kiu raportas rapide ĉiujn nekonatajn vortojn en la panelo de rezultoj, sen proponoj; kaj <strong>Aldonu al la vortaro</strong>, kiu aldonas vorton al la propra vortaro.</p>
+<h3 id="kio-estas-kontrolata">Kio estas kontrolata</h3>
+<p>Vorto estas rigardata kiel nekonata, se ĝi ne troviĝas en la vortaro (en la formo kiel skribita, minuskle aŭ kun majuskla komenco) nek en la propra vortaro. Vortoj en x-sistemo (cxu, sxi) estas akceptataj, se ilia supersigna formo ekzistas. Vortoj kun apostrofo (ekz. l’) estas kontrolataj kiel unu vorto; vortoj kun malpli ol du literoj ne estas kontrolataj.</p>
+<p>Ne estas kontrolataj: komentoj, la etikedoj mem kaj la enhavo de <code>&lt;ret&gt;</code>, <code>&lt;kod&gt;</code>, <code>&lt;n-ro&gt;</code>, <code>&lt;inf&gt;</code>, <code>&lt;lig&gt;</code>, <code>&lt;loko&gt;</code> kaj <code>&lt;retfoto&gt;</code>; HTML-kodoj (&amp;...;), tamen la resto de vorto apud kodo (ekz. «ber» en <code>&amp;Uuml;ber</code>) estos raportata, do oni unue konvertu la kodojn per «HTML-kodoj → UTF8»; mallongaj ĉiuj-majusklaj vortoj (ĝis 5 literoj, ekz. UEA, FEL), kiuj estas konsiderataj mallongigoj; kaj vortoj kun majuskla komenco meze de frazo (supozataj nomoj), ĉar nomoj malofte estas en la vortaro. Vorto kun majuskla komenco post punkto, krisigno, demandosigno, dupunkto aŭ citilo aperas kontrolata, same kiel ĉe la komenco de la teksto. La konstanto <code>IGNORI_NOMOJN</code> en la komenco de <code>spell_check.py</code> ŝalteblas.</p>
+<h3 id="kontrolo-ekde-la-kursoro-f7">Kontrolo ekde la kursoro (F7)</h3>
+<p>La kontrolo komenciĝas ĉe la kursoro. Ĉiu nekonata vorto estas elektita kaj flave markita, kaj aperas la dialogo «Literumilo», metita for de la vorto. Supre staras la nekonata vorto; meze listo de proponoj (ĝis 10; la konstanto <code>MAKS_PROPONOJ</code>), kalkulitaj fone, do la fenestro restas uzebla; malsupre kampo kun la vorto, kie oni povas skribi la korekton mem. Elekto en la listo kopias ĝin en la kampon; duobla alklako sur propono kaj Enter en la kampo anstataŭigas la vorton.</p>
+<table>
+<thead>
+<tr>
+<th>Butono</th>
+<th>Efiko</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Preterpasi</td>
+<td>Lasas la vorton, nur ĉi-foje</td>
+</tr>
+<tr>
+<td>Akcepti</td>
+<td>Ignoras ĉiujn aperojn de tiu vorto (sen distingo de majuskloj) ĝis la fino de la nuna kontrolo; nenio estas konservata</td>
+</tr>
+<tr>
+<td>Anstataŭigi</td>
+<td>Anstataŭigas la vorton per la teksto en la kampo; se la kampo ne ŝanĝiĝis, ĝi agas kiel Preterpasi</td>
+</tr>
+<tr>
+<td>Anstataŭigi ĉion</td>
+<td>Same, kaj poste ĉiuj postaj samaj vortoj en la nuna kontrolo estas anstataŭigataj aŭtomate</td>
+</tr>
+<tr>
+<td>Aldoni</td>
+<td>Aldonas la vorton (aŭ la tekston en la kampo) al la propra vortaro kaj daŭrigas</td>
+</tr>
+<tr>
+<td>Eliri</td>
+<td>Finas la kontrolon (ankaŭ Esc aŭ fermo de la fenestro)</td>
+</tr>
+</tbody>
+</table>
+<p>Kiam la kontrolo atingas la finon de la teksto kaj oni komencis ne ĉe la komenco, la programo demandas «Ĉu daŭrigi de la komenco?» kaj kontrolas ĝis la loko, kie oni komencis. Je la fino aperas resumo: nombro de anstataŭigoj, aldonoj al la vortaro kaj preterpasoj; se oni elektis Eliri, la resumo aperas nur en la statobreto. Ĉiu anstataŭigo estas malfarebla per Ctrl+Z.</p>
+<h3 id="listo-de-nekonataj-vortoj">Listo de nekonataj vortoj</h3>
+<p>La panelo de rezultoj montras la titolon «Literumado: N nekonataj vortoj (F7 por kontroli kun proponoj)». Ĉiu ero montras la linion de la unua apero, la vorton en « » kaj, se pluraj, la nombron (ekz. ««foobar» (3×)»). Duobla alklako saltas al la linio. Se nenio estas nekonata: «Neniu literuma eraro trovita.»</p>
+<h3 id="la-propra-vortaro">La propra vortaro</h3>
+<p>La dosiero <code>vortaroj/propra.txt</code> enhavas radikojn (nomoj, fakvortoj), unu po linio; linioj kun # estas komentoj. Radiko akceptas ĉiujn gramatikajn finaĵojn: o, oj, on, ojn, a, aj, an, ajn, e, en, i, u, as, is, os, us, j, n kaj la formon sen finaĵo. Se la vorto komenciĝas per iu radiko kaj la resto estas unu el tiuj finaĵoj, ĝi estas akceptata. La butono «Aldoni» kaj la menuero «Aldonu al la vortaro» metas la radikon en la dosieron: la finaĵo estas forigata, se restas almenaŭ 3 literoj («holivudaj» → «holivud»), kaj la radiko estas minuskla. La menuero uzas la elektitan tekston aŭ demandas pri la vorto; nur unusola vorto estas akceptata. La statobreto diras: ««radiko» aldonita al vortaroj/propra.txt (akceptas ĉiujn gramatikajn finaĵojn)». Mallonga radiko akceptas multajn vortojn, do oni aldonu nur radikojn, kiujn oni vere volas.</p>
+<p>Atentu: la literumilo ne kontrolas gramatikon aŭ signifon. Vorto, kiu ekzistas en la vortaro, ne estas raportata, eĉ se ĝi ne taŭgas en la frazo, kaj vortoj de aliaj lingvoj estas nekonataj.</p>
+<h2 id="aliaj-iloj">Aliaj iloj</h2>
+<p>La kategorio Aliaj iloj enhavas du apartajn helpilojn: Kvanto de tajperoj, kiu nur informas, kaj Rekonstruilo de alineoj, kiu ŝanĝas la tekston.</p>
+<h3 id="kvanto-de-tajperoj-count-py">Kvanto de tajperoj (count.py)</h3>
+<p>Tiu ilo kalkulas la longon de la artikolo en signoj, komencante de la etikedo <code>&lt;tt&gt;</code>; ĝi nur montras la nombron en informa fenestro («Longo ekde <code>&lt;tt&gt;</code>: N signoj.») kaj ŝanĝas nenion. Ĝi kontrolas la tutan dokumenton. Se ĝi ne trovas <code>&lt;tt&gt;</code>, aperas averto: «Mi ne trovas la etikedon <code>&lt;tt&gt;</code>: la kalkulo komenciĝas de tie.»</p>
+<p>La teksto antaŭ <code>&lt;tt&gt;</code> ne kalkuliĝas; ekde <code>&lt;tt&gt;</code> ĝis la fino de la dokumento ĝi rigardas ĉion, ankaŭ la enhavon de <code>&lt;aut&gt;</code>, <code>&lt;kod&gt;</code> kaj aliaj kampoj, kiuj staras post <code>&lt;tt&gt;</code>. Ĉiuj etikedoj (kun siaj atributoj) estas forigitaj, sed ilia enhavo restas; komentoj ne kalkuliĝas; spacoj kaj tabuloj antaŭ kaj post novlinio estas forigitaj, same kiel la spacoj kaj novlinioj komence kaj fine de la tuto. Oni kalkulas la restantajn signojn, kaj ĉiu novlinio inter linioj valoras unu signon. Ekzemple la teksto <code>&lt;tt&gt;Tema&lt;/tt&gt;</code>, <code>&lt;t&gt;Titolo&lt;/t&gt;</code>, <code>&lt;p&gt;Unu du.&lt;/p&gt;</code> en tri linioj donas 19 signojn: «Tema», novlinio, «Titolo», novlinio kaj «Unu du.».</p>
+<p>Atentu: HTML-kodoj kiel <code>&amp;Uuml;</code> ne estas konvertataj antaŭ la kalkulo, kaj kalkuliĝas kiel ĉiuj siaj signoj; por justa nombro oni unue konvertu ilin per «HTML-kodoj → UTF8». Same, se oni uzas la skribmanieron cx, gx ktp., ĉiu paro kalkuliĝas kiel du signoj. La retumila antaŭrigardo ankaŭ montras la longon ekde <code>&lt;tt&gt;</code>, sed ĝi antaŭe konvertas HTML-kodojn kaj cx; tial la du nombroj povas iomete diferenci.</p>
+<h3 id="rekonstruilo-de-alineoj-reconstruct-paragraphs-py">Rekonstruilo de alineoj (reconstruct_paragraphs.py)</h3>
+<p>Tiu ilo riparas tekston rompitan en mallongajn liniojn (ekzemple kopiitan el PDF aŭ el retpoŝto): ĝi kunigas la vortojn disigitajn per streketo kaj la liniojn de unu frazo. La rezulto estas unu linio por ĉiu frazogrupo, preta por la konvertiloj «Teksto → XML-dokumento» kaj «Teksto → intervjuo», kiuj faras alineon el ĉiu linio. La ilo agas sur la elekto aŭ, se nenio estas elektita, sur la tuta dokumento; ĝi ne montras mesaĝon, la rezulto aperas rekte en la teksto.</p>
+<p>La reguloj aplikataj estas jenaj, en tiu ordo. Windows-linifinoj (CRLF) fariĝas ordinaraj linifinoj. Streketo ĉe la fino de linio estas forigata kune kun la linifino: «kre-» + «ita» fariĝas «kreita». Se linio finas per punkto, krisigno aŭ demandosigno, la linifino restas kaj spacoj antaŭ ĝi estas forigataj; ankaŭ malplenaj linioj post tia linio kuniĝas en unu linifinon. Se linio finas per komo aŭ punktokomo, la linifino fariĝas spaco. Se linio finas per dupunkto, la linifino restas. Ajna alia linifino (la linio ne finas per <code>,;:.!?</code>) fariĝas spaco. Spacoj kaj linifinoj ĉe la komenco kaj fino de la teksto estas forigataj.</p>
+<p>Atentu kelkajn limojn. La ilo konsideras «frazo finas linion», ne «alineo finas»: se linio de unu alineo hazarde finas per punkto, ĝi restas aparta linio, kaj la malplenaj linioj inter alineoj ne restas, ĉar ili kuniĝas kun la sekva linifino. Titoloj kaj aliaj linioj sen fina interpunkcio kuniĝas kun la sekva linio («Titolo» + malplena linio + «Teksto» = «Titolo  Teksto», kun du spacoj); oni apartigu ilin poste mane aŭ aldonu punkton. Ĉiu streketo ĉe fino de linio estas forigata, eĉ se ĝi apartenas al la vorto («Nord-» + «Ameriko» fariĝas «NordAmeriko»); oni kontrolu tiajn kazojn. Kaj linio, kiu finas per citilo aŭ krampo post la punkto (ekz. ...diris.“), ne kalkuliĝas kiel fino de frazo kaj kuniĝas kun la sekva.</p>
+<h2 id="propraj-kromprogramoj">Propraj kromprogramoj</h2>
+<p>Oni povas aldoni proprajn kromprogramojn sen ajna instalado: sufiĉas nova .py-dosiero en la dosierujo <code>kromprogramoj</code>. Plej facile estas kopii la modelon <code>_example.py</code>, forigi la «_» el la nomo kaj poste elekti Kromprogramoj → Reŝargi kromprogramojn (aŭ restarti la redaktilon). Kromprogramo havas la kategorion (<code>CATEGORY</code>, la submenuo en la menuo Kromprogramoj), la nomon de la menuero (<code>NAME</code>) kaj la funkcion <code>run(ctx)</code>, kiu ruliĝas kiam oni elektas la menueron:</p>
+<pre><code class="language-python">CATEGORY = &quot;Ekzemplo&quot;
+NAME = &quot;Majuskloj&quot;
+
+def run(ctx):
+    ctx.apply(str.upper)
+</code></pre>
+<p>Por pluraj menueroj en unu dosiero oni uzas la liston <code>ACTIONS = [("Ero 1", funkcio1), ("Ero 2", funkcio2)]</code>; ĉiu funkcio ricevas <code>ctx</code>. Tria elemento en la ero (ekz. <code>("Ero", funkcio, "F7")</code>) montras klavon en la menuo, kaj la vortaro <code>HOTKEYS = {"&lt;F7&gt;": funkcio}</code> ligas la klavon al la funkcio.</p>
+<p>La objekto <code>ctx</code> ofertas jenajn eblojn:</p>
+<table>
+<thead>
+<tr>
+<th>Ero</th>
+<th>Funkcio</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ctx.text</code></td>
+<td>La tuta teksto de la dokumento</td>
+</tr>
+<tr>
+<td><code>ctx.selection()</code></td>
+<td>La elektita teksto (aŭ None)</td>
+</tr>
+<tr>
+<td><code>ctx.set_text(s)</code></td>
+<td>Anstataŭas la tutan tekston (malfarebla per Ctrl+Z)</td>
+</tr>
+<tr>
+<td><code>ctx.replace_selection(s)</code></td>
+<td>Anstataŭas la elekton</td>
+</tr>
+<tr>
+<td><code>ctx.insert(s)</code></td>
+<td>Enmetas ĉe la kursoro</td>
+</tr>
+<tr>
+<td><code>ctx.apply(fn)</code></td>
+<td>Aplikas <code>fn(teksto)</code> al la elekto, aŭ al ĉio se nenio estas elektita</td>
+</tr>
+<tr>
+<td><code>ctx.report(titolo, eroj)</code></td>
+<td>Panelo de rezultoj; <code>eroj</code> = <code>[(linio, mesaĝo), ...]</code>, kun salto al la linio per duobla alklako</td>
+</tr>
+<tr>
+<td><code>ctx.info(msg)</code>, <code>ctx.warn(msg)</code>, <code>ctx.confirm(msg)</code>, <code>ctx.ask(msg)</code></td>
+<td>Dialogoj</td>
+</tr>
+<tr>
+<td><code>ctx.status(msg)</code></td>
+<td>Mesaĝo en la statobreto</td>
+</tr>
+<tr>
+<td><code>ctx.path</code></td>
+<td>Vojo de la malfermita dosiero (aŭ None)</td>
+</tr>
+<tr>
+<td><code>ctx.tr</code></td>
+<td>Traduko de mesaĝoj</td>
+</tr>
+</tbody>
+</table>
+<p>Por interagaj kromprogramoj (kiel la literumilo) ekzistas pliaj iloj: <code>ctx.root</code> kaj <code>ctx.text_widget</code> (la ĉefa fenestro kaj la tekstokampo de tkinter), <code>ctx.cursor_offset()</code> (pozicio de la kursoro), <code>ctx.offset_to_index(n)</code>, <code>ctx.select_range(a, b)</code> kaj <code>ctx.replace_range(a, b, s)</code>; ĉiu anstataŭigo estas unu Ctrl+Z. Pretajn funkciojn por kontrolo de etikedoj, ŝlosilvortoj ktp. oni trovas en <code>monato_common.py</code>.</p>
+<p>Unu limo validas por la memstara .exe-versio: kromprogramoj povas uzi la norman bibliotekon de Python (re, os, json, csv, datetime, difflib, urllib.parse, xml.etree ktp.), sed ne eksterajn pakaĵojn (requests, numpy…), krom se oni aldonas ilin al la konstruo per <code>konstrui_exe.bat</code>.</p>
+</main></div></body></html>
