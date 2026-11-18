@@ -35,7 +35,7 @@ CATEGORY_ORDER = ["Konvertiloj", "Kontroliloj", "Literumilo", "Aliaj iloj"]
 DEFAULT_FONT_FAMILY = "DejaVu Sans Mono"
 DEFAULT_FONT_SIZE = 12
 CONVENTIONS_URL = "https://www.monato.be/red/tek_konv.php"
-GUIDE_FILE = os.path.join(BASE, "doc/gvidilo.html")   # la guida, accanto a Redaktilo.exe
+GUIDE_FILE = os.path.join(BASE, "doc", "gvidilo.html")   # la guida, accanto a Redaktilo.exe
 
 X_MAP = {"c": "ĉ", "g": "ĝ", "h": "ĥ", "j": "ĵ", "s": "ŝ", "u": "ŭ",
          "C": "Ĉ", "G": "Ĝ", "H": "Ĥ", "J": "Ĵ", "S": "Ŝ", "U": "Ŭ"}
@@ -1052,7 +1052,7 @@ class App:
         self.plugin_menu = tk.Menu(self.menubar, tearoff=0)
         self.menubar.add_cascade(label=tr("Kromprogramoj"), menu=self.plugin_menu)
 
-            m = tk.Menu(self.menubar, tearoff=0)
+        m = tk.Menu(self.menubar, tearoff=0)
         m.add_command(label=tr("Gvidilo de Redaktilo…"), command=self.open_guide)
         m.add_command(label=tr("Teknikaj konvencioj de Monato…"), command=self.open_conventions)
         m.add_command(label=tr("Pri la programo…"), command=self.about)
@@ -1163,7 +1163,7 @@ class App:
         load_language(code)
         show_info(self.root, tr("La lingvo estos ŝanĝita post restarto de Redaktilo."))
 
-        def open_guide(self):
+    def open_guide(self):
         """Malfermas la lokan gvidilon (gvidilo.html) en la retumilo."""
         from pathlib import Path
         if not os.path.isfile(GUIDE_FILE):
