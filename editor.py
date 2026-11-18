@@ -1057,7 +1057,7 @@ class App:
         m.add_command(label=tr("Teknikaj konvencioj de Monato…"), command=self.open_conventions)
         m.add_command(label=tr("Pri la programo…"), command=self.about)
         self.menubar.add_cascade(label=tr("Helpo"), menu=m)
-
+        self._apply_menu_fonts()
     # ---------------------------------------------------------------- plugin
     def load_plugins(self):
         self.plugins = []
