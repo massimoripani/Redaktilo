@@ -25,9 +25,9 @@ cp LEGUMIN.txt LICENCO.txt dist/Redaktilo/ || exit 1
 
 # Kontrolas la ĉeeston de la integra gvidlibro.
 if [ ! -f dist/Redaktilo/doc/gvidilo.html ]; then
-  echo "ERARO: doc/gvidlibro.html ne trovita en la pakaĵo." >&2
+  echo "ERARO: doc/gvidilo.html ne trovita en la pakaĵo." >&2
   exit 1
 fi
 
 echo "FINITE: dist/Redaktilo/"
-echo "La gvidlibro troviĝas en dist/Redaktilo/doc/gvidlibro.html"
+echo "La gvidlibro troviĝas en dist/Redaktilo/doc/gvidilo.html"

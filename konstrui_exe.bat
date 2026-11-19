@@ -33,7 +33,7 @@ xcopy /E /I /Y doc "dist\Redaktilo\doc" >nul
 if errorlevel 1 goto eraro
 
 REM Kontrolas, cxu la gvidilo efektive estas en la pakaĵo.
-if not exist "dist\Redaktilo\doc\gvidlibro.html" goto eraro
+if not exist "dist\Redaktilo\doc\gvidilo.html" goto eraro
 
 if not exist "dist\Redaktilo\Redaktilo.exe" goto eraro
 
@@ -43,7 +43,7 @@ if exist Redaktilo.spec del /q Redaktilo.spec
 echo.
 echo FINITE. Uzu nur la programon en: %CD%\dist\Redaktilo\Redaktilo.exe
 echo (Konservu la tutan dosierujon dist\Redaktilo, ne nur la .exe.)
-echo La integra gvidilo trovigxas en dist\Redaktilo\doc\gvidlibro.html.
+echo La integra gvidilo trovigxas en dist\Redaktilo\doc\gvidilo.html.
 pause
 exit /b 0
 
