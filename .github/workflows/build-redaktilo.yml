@@ -218,8 +218,8 @@ jobs:
 
           if [[ -f dist/Redaktilo/doc/gvidilo.html ]]; then
             echo "Guida trovata: gvidilo.html"
-          elif [[ -f dist/Redaktilo/doc/gvidlibro.html ]]; then
-            echo "Guida trovata: gvidlibro.html"
+          elif [[ -f dist/Redaktilo/doc/gvidilo.html ]]; then
+            echo "Guida trovata: gvidilo.html"
           else
             echo "ERARO: guida non presente in dist/Redaktilo/doc/"
             echo "Contenuto della cartella dist:"
