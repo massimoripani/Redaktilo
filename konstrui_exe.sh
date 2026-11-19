@@ -24,7 +24,7 @@ cp -r kromprogramoj vortaroj lingvoj licencoj doc dist/Redaktilo/ || exit 1
 cp LEGUMIN.txt LICENCO.txt dist/Redaktilo/ || exit 1
 
 # Kontrolas la ĉeeston de la integra gvidlibro.
-if [ ! -f dist/Redaktilo/doc/gvidlibro.html ]; then
+if [ ! -f dist/Redaktilo/doc/gvidilo.html ]; then
   echo "ERARO: doc/gvidlibro.html ne trovita en la pakaĵo." >&2
   exit 1
 fi
