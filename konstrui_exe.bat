@@ -1,3 +1,4 @@
+
 @echo off
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
@@ -27,13 +28,22 @@ xcopy /E /I /Y vortaroj "dist\Redaktilo\vortaroj" >nul
 xcopy /E /I /Y lingvoj "dist\Redaktilo\lingvoj" >nul
 xcopy /E /I /Y licencoj "dist\Redaktilo\licencoj" >nul
 
+REM La integra gvidilo.
+xcopy /E /I /Y doc "dist\Redaktilo\doc" >nul
+if errorlevel 1 goto eraro
+
+REM Kontrolas, cxu la gvidilo efektive estas en la pakaĵo.
+if not exist "dist\Redaktilo\doc\gvidlibro.html" goto eraro
+
 if not exist "dist\Redaktilo\Redaktilo.exe" goto eraro
+
 REM Forigi la provizorajn dosierojn (la dosierujo "build" NE enhavas la finan programon).
 if exist build rmdir /s /q build
 if exist Redaktilo.spec del /q Redaktilo.spec
 echo.
 echo FINITE. Uzu nur la programon en: %CD%\dist\Redaktilo\Redaktilo.exe
 echo (Konservu la tutan dosierujon dist\Redaktilo, ne nur la .exe.)
+echo La integra gvidilo trovigxas en dist\Redaktilo\doc\gvidlibro.html.
 pause
 exit /b 0
 
