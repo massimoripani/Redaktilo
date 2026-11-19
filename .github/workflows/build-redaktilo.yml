@@ -15,23 +15,22 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag della Release da compilare (es. v2.33). Lascia vuoto per una build di sviluppo."
+        description: "Tag della Release da compilare (es. v2.36). Lascia vuoto per una build di sviluppo."
         required: false
         type: string
 
 permissions:
   contents: read
 
-# Evita esecuzioni contemporanee per la stessa Release.
 concurrency:
   group: redaktilo-${{ github.event.release.tag_name || inputs.tag || github.ref }}
   cancel-in-progress: false
 
 jobs:
 
-  # --------------------------------------------------
-  # GENERAZIONE WHATS_NEW.TXT
-  # --------------------------------------------------
+  # ================================================
+  # GENERAZIONE NOTE DI RILASCIO
+  # ================================================
 
   release-notes:
     name: Genera le note di rilascio
@@ -53,7 +52,7 @@ jobs:
       RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
 
     steps:
-      - name: Genera WHATS_NEW.txt dalle Release Notes
+      - name: Genera WHATS_NEW.txt
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -66,7 +65,6 @@ jobs:
           fi
 
           VERSION="${RELEASE_TAG#v}"
-
           BODY=""
 
           if BODY=$(gh api \
@@ -97,9 +95,9 @@ jobs:
           path: WHATS_NEW.txt
           if-no-files-found: error
 
-  # --------------------------------------------------
-  # COMPILAZIONE WINDOWS / LINUX
-  # --------------------------------------------------
+  # ================================================
+  # COMPILAZIONE WINDOWS E LINUX
+  # ================================================
 
   build:
     name: Build (${{ matrix.name }})
@@ -115,7 +113,6 @@ jobs:
 
     strategy:
       fail-fast: false
-
       matrix:
         include:
           - os: windows-latest
@@ -129,10 +126,15 @@ jobs:
 
     steps:
 
+      # --------------------------------------------
+      # CHECKOUT: TAG ESPLICITO O RAMO CORRENTE
+      # --------------------------------------------
+
       - name: Checkout del codice
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.release.tag_name || inputs.tag || github.ref }}
+          ref: ${{ inputs.tag != '' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          fetch-depth: 0
 
       - name: Determina la versione
         shell: bash
@@ -146,8 +148,11 @@ jobs:
           fi
 
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
-
           echo "Versione del pacchetto: $VERSION"
+
+      # --------------------------------------------
+      # PYTHON
+      # --------------------------------------------
 
       - name: Setup Python
         uses: actions/setup-python@v7
@@ -160,9 +165,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y python3-tk tk-dev
 
-      # ----------------------------------------------
-      # SCARICAMENTO WHATS_NEW.TXT
-      # ----------------------------------------------
+      # --------------------------------------------
+      # NOTE DI RILASCIO
+      # --------------------------------------------
 
       - name: Scarica le note di rilascio
         if: needs.release-notes.result == 'success'
@@ -182,46 +187,49 @@ jobs:
           fi
 
           mkdir -p dist/Redaktilo
-
           cp WHATS_NEW.txt dist/Redaktilo/WHATS_NEW.txt
 
-      # ----------------------------------------------
+      # --------------------------------------------
       # BUILD WINDOWS
-      # ----------------------------------------------
+      # --------------------------------------------
 
       - name: Build Windows
         if: runner.os == 'Windows'
         shell: cmd
         run: call konstrui_exe.bat < nul
 
-      # ----------------------------------------------
+      # --------------------------------------------
       # BUILD LINUX
-      # ----------------------------------------------
+      # --------------------------------------------
 
       - name: Build Linux
         if: runner.os == 'Linux'
         shell: bash
         run: sh konstrui_exe.sh
 
-      # ----------------------------------------------
-      # VERIFICA GUIDA INTEGRATA
-      # ----------------------------------------------
+      # --------------------------------------------
+      # CONTROLLO GUIDA INTEGRATA
+      # --------------------------------------------
 
       - name: Verifica la presenza della guida
         shell: bash
         run: |
           set -euo pipefail
 
-          if [[ ! -f dist/Redaktilo/doc/gvidilo.html ]]; then
-            echo "ERRORE: doc/gvidilo.html non presente nel pacchetto!"
+          if [[ -f dist/Redaktilo/doc/gvidilo.html ]]; then
+            echo "Guida trovata: gvidilo.html"
+          elif [[ -f dist/Redaktilo/doc/gvidlibro.html ]]; then
+            echo "Guida trovata: gvidlibro.html"
+          else
+            echo "ERARO: guida non presente in dist/Redaktilo/doc/"
+            echo "Contenuto della cartella dist:"
+            find dist -maxdepth 4 -type f
             exit 1
           fi
 
-          echo "Guida integrata correttamente."
-
-      # ----------------------------------------------
-      # WHATS_NEW DENTRO IL PROGRAMMA
-      # ----------------------------------------------
+      # --------------------------------------------
+      # AGGIORNAMENTO WHATS_NEW
+      # --------------------------------------------
 
       - name: Inserisce WHATS_NEW.txt nel pacchetto
         shell: bash
@@ -229,9 +237,9 @@ jobs:
           set -euo pipefail
           cp WHATS_NEW.txt dist/Redaktilo/WHATS_NEW.txt
 
-      # ----------------------------------------------
+      # --------------------------------------------
       # ARCHIVIO WINDOWS
-      # ----------------------------------------------
+      # --------------------------------------------
 
       - name: Comprimi Windows
         if: matrix.name == 'windows'
@@ -242,9 +250,9 @@ jobs:
             -DestinationPath "Redaktilo-$env:VERSION-windows.zip" `
             -Force
 
-      # ----------------------------------------------
+      # --------------------------------------------
       # ARCHIVIO LINUX
-      # ----------------------------------------------
+      # --------------------------------------------
 
       - name: Comprimi Linux
         if: matrix.name == 'linux'
@@ -255,9 +263,9 @@ jobs:
           tar -czf "Redaktilo-${VERSION}-linux.tar.gz" \
             -C dist Redaktilo
 
-      # ----------------------------------------------
+      # --------------------------------------------
       # CARICAMENTO ARTEFATTI
-      # ----------------------------------------------
+      # --------------------------------------------
 
       - name: Carica l'artefatto
         uses: actions/upload-artifact@v6
@@ -266,9 +274,9 @@ jobs:
           path: Redaktilo-*.${{ matrix.name == 'windows' && 'zip' || 'tar.gz' }}
           if-no-files-found: error
 
-  # --------------------------------------------------
-  # PUBBLICAZIONE / AGGIORNAMENTO RELEASE
-  # --------------------------------------------------
+  # ================================================
+  # PUBBLICAZIONE RELEASE
+  # ================================================
 
   release:
     name: Pubblica i pacchetti
@@ -298,7 +306,7 @@ jobs:
 
     steps:
 
-      - name: Scarica gli artefatti di compilazione
+      - name: Scarica gli artefatti
         uses: actions/download-artifact@v7
         with:
           pattern: build-*
@@ -311,9 +319,9 @@ jobs:
           name: release-notes
           path: release-assets
 
-      # ----------------------------------------------
-      # VERIFICA NOMI E PRESENZA DEI PACCHETTI
-      # ----------------------------------------------
+      # --------------------------------------------
+      # VERIFICA PACCHETTI
+      # --------------------------------------------
 
       - name: Verifica i pacchetti
         shell: bash
@@ -322,8 +330,7 @@ jobs:
 
           VERSION="${RELEASE_TAG#v}"
 
-          echo "Controllo pacchetti della versione $VERSION"
-
+          echo "Controllo pacchetti versione $VERSION"
           ls -lh release-assets/
 
           test -f "release-assets/Redaktilo-${VERSION}-windows.zip"
@@ -332,9 +339,9 @@ jobs:
 
           echo "Entrambi i pacchetti sono presenti."
 
-      # ----------------------------------------------
-      # CHECKSUM SHA256
-      # ----------------------------------------------
+      # --------------------------------------------
+      # CHECKSUM
+      # --------------------------------------------
 
       - name: Genera SHA256SUMS.txt
         shell: bash
@@ -348,12 +355,11 @@ jobs:
             "Redaktilo-${RELEASE_TAG#v}-linux.tar.gz" \
             > SHA256SUMS.txt
 
-          echo "Checksum generati:"
           cat SHA256SUMS.txt
 
-      # ----------------------------------------------
-      # PUBBLICAZIONE RELEASE
-      # ----------------------------------------------
+      # --------------------------------------------
+      # PUBBLICAZIONE SU GITHUB
+      # --------------------------------------------
 
       - name: Aggiorna la Release GitHub
         uses: softprops/action-gh-release@v3
