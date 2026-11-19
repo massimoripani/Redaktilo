@@ -1,7 +1,7 @@
 REDAKTILO
 =========
 UTF-8-redaktilo kun kromprogramoj por Esperanto kaj la teknikaj konvencioj de Monato.
-Versio 2.35.
+Versio 2.36.
 
 LANĈO
   Windows:    duoble klaku Redaktilo.exe (post konstruo per konstrui_exe.bat)
